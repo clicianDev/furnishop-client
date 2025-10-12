@@ -1,0 +1,146 @@
+.user-dashboard {
+  padding: 40px 20px;
+}
+
+.user-dashboard h1 {
+  margin-bottom: 30px;
+  color: #333;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 30px;
+}
+
+.user-info {
+  height: fit-content;
+}
+
+.user-info h2 {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.profile-details p {
+  margin-bottom: 10px;
+  color: #666;
+}
+
+.profile-details strong {
+  color: #333;
+}
+
+.orders-section h2 {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.order-card {
+  transition: transform 0.3s ease;
+}
+
+.order-card:hover {
+  transform: translateY(-2px);
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.order-header h3 {
+  color: #333;
+}
+
+.status {
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.status.pending {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.status.processing {
+  background-color: #cce5ff;
+  color: #004085;
+}
+
+.status.shipped {
+  background-color: #d1ecf1;
+  color: #0c5460;
+}
+
+.status.delivered {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status.cancelled {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.order-details {
+  margin-bottom: 15px;
+}
+
+.order-details p {
+  margin-bottom: 5px;
+  color: #666;
+}
+
+.order-shipping {
+  margin-bottom: 15px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+}
+
+.order-shipping p {
+  margin-bottom: 5px;
+  color: #666;
+}
+
+.order-products {
+  padding-top: 15px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.order-products h4 {
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.order-product-item {
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+
+.order-product-item p {
+  margin-bottom: 5px;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 968px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
