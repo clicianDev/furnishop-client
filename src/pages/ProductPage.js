@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import Model3DViewer from '../components/Model3DViewer';
 import './ProductPage.css';
 
 const ProductPage = () => {
@@ -10,6 +11,7 @@ const ProductPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [quantity, setQuantity] = useState(1);
+  const [viewMode, setViewMode] = useState('image'); // 'image' or '3d'
 
   useEffect(() => {
     fetchProduct();
@@ -55,7 +57,31 @@ const ProductPage = () => {
     <div className="product-page container">
       <div className="product-detail">
         <div className="product-image-container">
-          <img src={product.image || 'https://via.placeholder.com/500'} alt={product.name} />
+          {/* View Mode Toggle */}
+          <div className="view-mode-toggle">
+            <button 
+              className={`toggle-btn ${viewMode === 'image' ? 'active' : ''}`}
+              onClick={() => setViewMode('image')}
+            >
+              📷 Image
+            </button>
+            <button 
+              className={`toggle-btn ${viewMode === '3d' ? 'active' : ''}`}
+              onClick={() => setViewMode('3d')}
+            >
+              🎲 3D View
+            </button>
+          </div>
+          
+          {/* Image or 3D View */}
+          {viewMode === 'image' ? (
+            <img src={product.image || 'https://via.placeholder.com/500'} alt={product.name} />
+          ) : (
+            <Model3DViewer 
+              modelPath="/models/table_furniture.glb" 
+              className="model-viewer-container"
+            />
+          )}
         </div>
         <div className="product-info">
           <h1>{product.name}</h1>
