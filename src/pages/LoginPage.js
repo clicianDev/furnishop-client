@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../config/axios';
 import Toast from '../components/Toast';
 import './LoginPage.css';
 
@@ -43,7 +43,7 @@ const LoginPage = () => {
         ? { email: formData.email, password: formData.password }
         : { name: formData.name, email: formData.email, password: formData.password };
 
-      const response = await axios.post(endpoint, payload);
+      const response = await api.post(endpoint, payload);
       
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('userRole', response.data.user.role);

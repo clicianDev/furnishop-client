@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../config/axios';
 import './UserDashboard.css';
 
 const UserDashboard = () => {
@@ -21,26 +21,20 @@ const UserDashboard = () => {
 
   const fetchUserData = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get('/api/users/profile', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await api.get('/api/users/profile');
       setUser(response.data);
     } catch (error) {
-      console.error('Failed to fetch user data');
+      console.error('Failed to fetch user data:', error);
     }
   };
 
   const fetchOrders = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get('/api/transactions/my-orders', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await api.get('/api/transactions/my-orders');
       setOrders(response.data);
       setLoading(false);
     } catch (error) {
-      console.error('Failed to fetch orders');
+      console.error('Failed to fetch orders:', error);
       setLoading(false);
     }
   };

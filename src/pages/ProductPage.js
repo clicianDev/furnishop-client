@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../config/axios';
 import Model3DViewer from '../components/Model3DViewer';
 import './ProductPage.css';
 
@@ -20,10 +20,11 @@ const ProductPage = () => {
 
   const fetchProduct = async () => {
     try {
-      const response = await axios.get(`/api/products/${id}`);
+      const response = await api.get(`/api/products/${id}`);
       setProduct(response.data);
       setLoading(false);
     } catch (err) {
+      console.error('Error fetching product:', err);
       setError('Failed to load product');
       setLoading(false);
     }

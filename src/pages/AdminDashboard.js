@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../config/axios';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -40,23 +40,20 @@ const AdminDashboard = () => {
   }, [activeTab]);
 
   const fetchData = async () => {
-    const token = localStorage.getItem('token');
-    const headers = { Authorization: `Bearer ${token}` };
-
     try {
       if (activeTab === 'users') {
-        const response = await axios.get('/api/users', { headers });
+        const response = await api.get('/api/users');
         setUsers(response.data);
       } else if (activeTab === 'products') {
-        const response = await axios.get('/api/products');
-        setProducts(response.data);
+        const response = await api.get('/api/products');
+        setProducts(Array.isArray(response.data) ? response.data : []);
       } else if (activeTab === 'transactions') {
-        const response = await axios.get('/api/transactions', { headers });
+        const response = await api.get('/api/transactions');
         setTransactions(response.data);
       }
       setLoading(false);
     } catch (error) {
-      console.error('Failed to fetch data');
+      console.error('Failed to fetch data:', error);
       setLoading(false);
     }
   };
@@ -71,18 +68,13 @@ const AdminDashboard = () => {
 
   const handleProductSubmit = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem('token');
     
     try {
       if (editingProductId) {
-        await axios.put(`/api/products/${editingProductId}`, productForm, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        await api.put(`/api/products/${editingProductId}`, productForm);
         alert('Product updated successfully!');
       } else {
-        await axios.post('/api/products', productForm, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        await api.post('/api/products', productForm);
         alert('Product created successfully!');
       }
       
@@ -145,11 +137,8 @@ const AdminDashboard = () => {
   const handleDeleteProduct = async (id) => {
     if (!window.confirm('Are you sure you want to delete this product?')) return;
     
-    const token = localStorage.getItem('token');
     try {
-      await axios.delete(`/api/products/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.delete(`/api/products/${id}`);
       alert('Product deleted successfully!');
       fetchData();
     } catch (error) {
@@ -161,11 +150,8 @@ const AdminDashboard = () => {
   const handleDeleteUser = async (id) => {
     if (!window.confirm('Are you sure you want to delete this user?')) return;
     
-    const token = localStorage.getItem('token');
     try {
-      await axios.delete(`/api/users/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.delete(`/api/users/${id}`);
       alert('User deleted successfully!');
       fetchData();
     } catch (error) {
@@ -175,11 +161,8 @@ const AdminDashboard = () => {
 
   // Transaction Management
   const handleUpdateTransactionStatus = async (id, status) => {
-    const token = localStorage.getItem('token');
     try {
-      await axios.put(`/api/transactions/${id}`, { status }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.put(`/api/transactions/${id}`, { status });
       alert('Transaction status updated!');
       fetchData();
     } catch (error) {

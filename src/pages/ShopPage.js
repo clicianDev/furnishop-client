@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../config/axios';
 import './ShopPage.css';
 
 const ShopPage = () => {
@@ -21,16 +21,19 @@ const ShopPage = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get('/api/products');
-      setProducts(response.data);
+      const response = await api.get('/api/products');
+      const productsData = Array.isArray(response.data) ? response.data : [];
+      setProducts(productsData);
       
       // Extract unique categories
-      const uniqueCategories = ['All', ...new Set(response.data.map(p => p.category))];
+      const uniqueCategories = ['All', ...new Set(productsData.map(p => p.category))];
       setCategories(uniqueCategories);
       
       setLoading(false);
     } catch (error) {
       console.error('Error fetching products:', error);
+      console.error('Response:', error.response?.data);
+      setProducts([]);
       setLoading(false);
     }
   };

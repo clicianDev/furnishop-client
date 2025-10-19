@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../config/axios';
 import './CheckoutPage.css';
 
 const CheckoutPage = () => {
@@ -68,9 +68,7 @@ const CheckoutPage = () => {
         shippingAddress: shippingInfo
       };
 
-      await axios.post('/api/transactions', transactionData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.post('/api/transactions', transactionData);
 
       alert('Order placed successfully!');
       localStorage.removeItem('cart');
