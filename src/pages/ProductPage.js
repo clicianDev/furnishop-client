@@ -12,6 +12,7 @@ const ProductPage = () => {
   const [error, setError] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [viewMode, setViewMode] = useState('image'); // 'image' or '3d'
+  const [selectedModelIndex, setSelectedModelIndex] = useState(0);
 
   useEffect(() => {
     fetchProduct();
@@ -32,15 +33,21 @@ const ProductPage = () => {
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
     const existingItem = cart.find(item => item.productId === id);
     
+    // Get the selected model variant's price or fallback to default product price
+    const selectedModel = product.models && product.models.length > 0 ? product.models[selectedModelIndex] : null;
+    const finalPrice = selectedModel ? selectedModel.price : product.price;
+    const variantName = selectedModel ? selectedModel.variantName : '';
+    
     if (existingItem) {
       existingItem.quantity += quantity;
     } else {
       cart.push({
         productId: id,
-        name: product.name,
-        price: product.price,
+        name: product.name + (variantName ? ` - ${variantName}` : ''),
+        price: finalPrice,
         quantity: quantity,
-        image: product.image
+        image: product.image,
+        modelIndex: selectedModelIndex
       });
     }
     
@@ -48,6 +55,22 @@ const ProductPage = () => {
     alert('Product added to cart!');
     navigate('/checkout');
   };
+
+  const handleModelChange = (index) => {
+    setSelectedModelIndex(index);
+  };
+
+  // Get current model variant details
+  const getCurrentVariant = () => {
+    if (product && product.models && product.models.length > 0) {
+      return product.models[selectedModelIndex] || product.models[0];
+    }
+    return null;
+  };
+
+  const currentVariant = getCurrentVariant();
+  const displayPrice = currentVariant ? currentVariant.price : product?.price;
+  const displayDescription = currentVariant ? currentVariant.description : product?.description;
 
   if (loading) return <div className="container">Loading...</div>;
   if (error) return <div className="container">{error}</div>;
@@ -68,6 +91,7 @@ const ProductPage = () => {
             <button 
               className={`toggle-btn ${viewMode === '3d' ? 'active' : ''}`}
               onClick={() => setViewMode('3d')}
+              disabled={!product.models || product.models.length === 0}
             >
               🎲 3D View
             </button>
@@ -78,19 +102,26 @@ const ProductPage = () => {
             <img src={product.image || 'https://via.placeholder.com/500'} alt={product.name} />
           ) : (
             <Model3DViewer 
-              modelPath="/models/table_furniture.glb" 
+              models={product.models || []}
               className="model-viewer-container"
+              onModelChange={handleModelChange}
+              selectedModelIndex={selectedModelIndex}
             />
           )}
         </div>
         <div className="product-info">
           <h1>{product.name}</h1>
-          <p className="product-price">₱{product.price.toFixed(2)}</p>
+          {currentVariant && (
+            <p className="product-variant">
+              <strong>Variant:</strong> {currentVariant.variantName}
+            </p>
+          )}
+          <p className="product-price">₱{displayPrice ? displayPrice.toFixed(2) : '0.00'}</p>
           <p className="product-category">Category: {product.category}</p>
           <p className="product-stock">
             Stock: {product.stock > 0 ? `${product.stock} available` : 'Out of stock'}
           </p>
-          <p className="product-description">{product.description}</p>
+          <p className="product-description">{displayDescription}</p>
           
           {product.stock > 0 && (
             <div className="purchase-section">

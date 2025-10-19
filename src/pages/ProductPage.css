@@ -63,6 +63,16 @@
   color: #333;
 }
 
+.product-variant {
+  background-color: #e7f3ff;
+  color: #0056b3;
+  padding: 8px 15px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  font-size: 1rem;
+  border-left: 4px solid #0056b3;
+}
+
 .product-price {
   font-size: 2.5rem;
   font-weight: bold;

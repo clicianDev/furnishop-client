@@ -18,9 +18,16 @@ const AdminDashboard = () => {
     price: '',
     category: 'Sofas',
     stock: '',
-    image: ''
+    image: '',
+    models: []
   });
   const [editingProductId, setEditingProductId] = useState(null);
+  const [currentModel, setCurrentModel] = useState({
+    modelUrl: '',
+    price: '',
+    description: '',
+    variantName: ''
+  });
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -79,8 +86,9 @@ const AdminDashboard = () => {
         alert('Product created successfully!');
       }
       
-      setProductForm({ name: '', description: '', price: '', category: 'Sofas', stock: '', image: '' });
+      setProductForm({ name: '', description: '', price: '', category: 'Sofas', stock: '', image: '', models: [] });
       setEditingProductId(null);
+      setCurrentModel({ modelUrl: '', price: '', description: '', variantName: '' });
       fetchData();
     } catch (error) {
       alert('Failed to save product');
@@ -94,9 +102,44 @@ const AdminDashboard = () => {
       price: product.price,
       category: product.category,
       stock: product.stock,
-      image: product.image || ''
+      image: product.image || '',
+      models: product.models || []
     });
     setEditingProductId(product._id);
+  };
+
+  const handleAddModel = () => {
+    if (!currentModel.modelUrl || !currentModel.price || !currentModel.description || !currentModel.variantName) {
+      alert('Please fill all model fields');
+      return;
+    }
+    
+    setProductForm({
+      ...productForm,
+      models: [...productForm.models, { ...currentModel, price: parseFloat(currentModel.price) }]
+    });
+    
+    setCurrentModel({
+      modelUrl: '',
+      price: '',
+      description: '',
+      variantName: ''
+    });
+  };
+
+  const handleRemoveModel = (index) => {
+    const updatedModels = productForm.models.filter((_, i) => i !== index);
+    setProductForm({
+      ...productForm,
+      models: updatedModels
+    });
+  };
+
+  const handleModelInputChange = (e) => {
+    setCurrentModel({
+      ...currentModel,
+      [e.target.name]: e.target.value
+    });
   };
 
   const handleDeleteProduct = async (id) => {
@@ -249,6 +292,102 @@ const AdminDashboard = () => {
                     placeholder="https://example.com/image.jpg"
                   />
                 </div>
+
+                {/* 3D Models Section */}
+                <div className="models-section">
+                  <h3>3D Model Variants</h3>
+                  <div className="model-input-group">
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label>Variant Name</label>
+                        <input
+                          type="text"
+                          name="variantName"
+                          value={currentModel.variantName}
+                          onChange={handleModelInputChange}
+                          placeholder="e.g., Cabinet Style 1"
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label>Model URL</label>
+                        <input
+                          type="url"
+                          name="modelUrl"
+                          value={currentModel.modelUrl}
+                          onChange={handleModelInputChange}
+                          placeholder="https://example.com/model.glb or /models/cabinet/cabinet-1.glb"
+                        />
+                      </div>
+                    </div>
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label>Variant Price</label>
+                        <input
+                          type="number"
+                          name="price"
+                          value={currentModel.price}
+                          onChange={handleModelInputChange}
+                          placeholder="0.00"
+                          step="0.01"
+                          min="0"
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label>Variant Description</label>
+                        <textarea
+                          name="description"
+                          value={currentModel.description}
+                          onChange={handleModelInputChange}
+                          placeholder="Description for this variant"
+                          rows="2"
+                        />
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleAddModel}
+                      className="btn btn-secondary"
+                      style={{ marginBottom: '10px' }}
+                    >
+                      Add Model Variant
+                    </button>
+                  </div>
+
+                  {/* Display added models */}
+                  {productForm.models.length > 0 && (
+                    <div className="models-list">
+                      <h4>Added Models ({productForm.models.length})</h4>
+                      {productForm.models.map((model, index) => (
+                        <div key={index} className="model-item" style={{
+                          padding: '10px',
+                          border: '1px solid #ddd',
+                          borderRadius: '4px',
+                          marginBottom: '10px',
+                          background: '#f9f9f9'
+                        }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                            <div>
+                              <strong>{model.variantName}</strong>
+                              <p style={{ margin: '5px 0', fontSize: '0.9em' }}>Price: ₱{model.price}</p>
+                              <p style={{ margin: '5px 0', fontSize: '0.9em', color: '#666' }}>{model.description}</p>
+                              <p style={{ margin: '5px 0', fontSize: '0.8em', color: '#888', wordBreak: 'break-all' }}>
+                                URL: {model.modelUrl}
+                              </p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveModel(index)}
+                              className="btn btn-danger btn-sm"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 <div className="form-actions">
                   <button type="submit" className="btn btn-primary">
                     {editingProductId ? 'Update Product' : 'Add Product'}
@@ -259,7 +398,8 @@ const AdminDashboard = () => {
                       className="btn btn-secondary"
                       onClick={() => {
                         setEditingProductId(null);
-                        setProductForm({ name: '', description: '', price: '', category: 'Sofas', stock: '', image: '' });
+                        setProductForm({ name: '', description: '', price: '', category: 'Sofas', stock: '', image: '', models: [] });
+                        setCurrentModel({ modelUrl: '', price: '', description: '', variantName: '' });
                       }}
                     >
                       Cancel
