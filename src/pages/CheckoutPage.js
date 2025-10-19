@@ -97,14 +97,14 @@ const CheckoutPage = () => {
                   <img src={item.image || 'https://via.placeholder.com/100'} alt={item.name} />
                   <div className="item-details">
                     <h3>{item.name}</h3>
-                    <p className="item-price">${item.price.toFixed(2)}</p>
+                    <p className="item-price">₱{item.price.toFixed(2)}</p>
                   </div>
                   <div className="item-quantity">
                     <button onClick={() => updateQuantity(item.productId, item.quantity - 1)}>-</button>
                     <span>{item.quantity}</span>
                     <button onClick={() => updateQuantity(item.productId, item.quantity + 1)}>+</button>
                   </div>
-                  <p className="item-total">${(item.price * item.quantity).toFixed(2)}</p>
+                  <p className="item-total">₱{(item.price * item.quantity).toFixed(2)}</p>
                   <button onClick={() => removeItem(item.productId)} className="btn-remove">×</button>
                 </div>
               ))}
@@ -161,15 +161,15 @@ const CheckoutPage = () => {
                 <h3>Order Summary</h3>
                 <div className="summary-row">
                   <span>Subtotal:</span>
-                  <span>${calculateTotal().toFixed(2)}</span>
+                  <span>₱{calculateTotal().toFixed(2)}</span>
                 </div>
                 <div className="summary-row">
                   <span>Shipping:</span>
-                  <span>${calculateTotal() > 50 ? '0.00' : '10.00'}</span>
+                  <span>₱{calculateTotal() > 50 ? '0.00' : '10.00'}</span>
                 </div>
                 <div className="summary-row total">
                   <span>Total:</span>
-                  <span>${(calculateTotal() + (calculateTotal() > 50 ? 0 : 10)).toFixed(2)}</span>
+                  <span>₱{(calculateTotal() + (calculateTotal() > 50 ? 0 : 10)).toFixed(2)}</span>
                 </div>
               </div>
 

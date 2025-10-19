@@ -287,7 +287,7 @@ const AdminDashboard = () => {
                       <tr key={product._id}>
                         <td>{product.name}</td>
                         <td>{product.category}</td>
-                        <td>${product.price.toFixed(2)}</td>
+                        <td>₱{product.price.toFixed(2)}</td>
                         <td>{product.stock}</td>
                         <td className="action-buttons">
                           <button
@@ -373,7 +373,7 @@ const AdminDashboard = () => {
                   <div className="transaction-details">
                     <p><strong>User ID:</strong> {transaction.userId}</p>
                     <p><strong>Date:</strong> {new Date(transaction.createdAt).toLocaleDateString()}</p>
-                    <p><strong>Total:</strong> ${transaction.totalAmount.toFixed(2)}</p>
+                    <p><strong>Total:</strong> ₱{transaction.totalAmount.toFixed(2)}</p>
                     <p><strong>Items:</strong> {transaction.products.length}</p>
                   </div>
                   <div className="transaction-address">

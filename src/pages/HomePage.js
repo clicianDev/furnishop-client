@@ -20,7 +20,7 @@ const HomePage = () => {
         <div className="grid grid-3">
           <div className="feature-card card">
             <h3>🚚 Free Shipping</h3>
-            <p>Free shipping on orders over $50</p>
+            <p>Free shipping on orders over ₱50</p>
           </div>
           <div className="feature-card card">
             <h3>💳 Secure Payment</h3>

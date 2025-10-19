@@ -99,7 +99,7 @@ const ShopPage = () => {
                   }}
                 />
                 <h3>{product.name}</h3>
-                <p className="product-price">${product.price.toFixed(2)}</p>
+                <p className="product-price">₱{product.price.toFixed(2)}</p>
                 <p className="product-description">
                   {product.description.substring(0, 100)}...
                 </p>

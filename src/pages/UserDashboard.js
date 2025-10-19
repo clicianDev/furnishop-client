@@ -79,7 +79,7 @@ const UserDashboard = () => {
                   </div>
                   <div className="order-details">
                     <p><strong>Date:</strong> {new Date(order.createdAt).toLocaleDateString()}</p>
-                    <p><strong>Total:</strong> ${order.totalAmount.toFixed(2)}</p>
+                    <p><strong>Total:</strong> ₱{order.totalAmount.toFixed(2)}</p>
                     <p><strong>Items:</strong> {order.products.length}</p>
                   </div>
                   <div className="order-shipping">
@@ -92,7 +92,7 @@ const UserDashboard = () => {
                     {order.products.map((product, index) => (
                       <div key={index} className="order-product-item">
                         <p>Product ID: {product.productId}</p>
-                        <p>Quantity: {product.quantity} × ${product.price.toFixed(2)}</p>
+                        <p>Quantity: {product.quantity} × ₱{product.price.toFixed(2)}</p>
                       </div>
                     ))}
                   </div>

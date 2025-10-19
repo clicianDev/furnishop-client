@@ -85,7 +85,7 @@ const ProductPage = () => {
         </div>
         <div className="product-info">
           <h1>{product.name}</h1>
-          <p className="product-price">${product.price.toFixed(2)}</p>
+          <p className="product-price">₱{product.price.toFixed(2)}</p>
           <p className="product-category">Category: {product.category}</p>
           <p className="product-stock">
             Stock: {product.stock > 0 ? `${product.stock} available` : 'Out of stock'}
