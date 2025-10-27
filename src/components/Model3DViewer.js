@@ -52,8 +52,8 @@ function Model({ modelPath, selectedTexture }) {
       if (child.isMesh && child.material) {
         // Check if the material name is "base" (case-insensitive)
         const materialName = child.material.name ? child.material.name.toLowerCase() : '';
-        
-        if (materialName === 'base') {
+
+        if (materialName === 'base' || materialName === 'part1' || materialName === 'part2' || materialName === 'part3' || materialName === 'part4') {
           // Update existing material or create new one
           if (child.material.isMeshStandardMaterial) {
             child.material.map = colorMap;
