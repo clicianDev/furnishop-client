@@ -94,7 +94,9 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Bottom Bar */}
+  
+      </div>
+            {/* Bottom Bar */}
         <div className="footer-bottom">
           <p className="copyright">© 2025 FurniShop. All rights reserved.</p>
           <div className="footer-bottom-links">
@@ -102,7 +104,6 @@ const Footer = () => {
             <Link to="/privacy">Privacy Policy</Link>
           </div>
         </div>
-      </div>
     </footer>
   );
 };
