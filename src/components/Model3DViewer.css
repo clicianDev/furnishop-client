@@ -36,3 +36,168 @@
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
+
+/* Texture Selector Styles */
+.texture-selector {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  padding: 12px 20px;
+ 
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  max-width: 90%;
+}
+
+.texture-label {
+  font-weight: bold;
+  font-size: 14px;
+  color: #333;
+  white-space: nowrap;
+  margin: 0;
+}
+
+.texture-options-wrapper {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #667eea rgba(0, 0, 0, 0.1);
+}
+
+.texture-options-wrapper::-webkit-scrollbar {
+  height: 6px;
+}
+
+.texture-options-wrapper::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 3px;
+}
+
+.texture-options-wrapper::-webkit-scrollbar-thumb {
+  background: #667eea;
+  border-radius: 3px;
+}
+
+.texture-options-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #5568d3;
+}
+
+.texture-options {
+  display: flex;
+  gap: 15px;
+  padding: 2px 0;
+}
+
+.texture-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  flex-shrink: 0;
+}
+
+.texture-option:hover {
+  transform: scale(1.05);
+}
+
+.texture-image-wrapper {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid transparent;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  background: #f0f0f0;
+}
+
+.texture-option.selected .texture-image-wrapper {
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+}
+
+.texture-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.texture-name {
+  margin-top: 6px;
+  font-size: 11px;
+  text-align: center;
+  color: #555;
+  font-weight: 500;
+  line-height: 1.2;
+  max-width: 70px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.texture-option.selected .texture-name {
+  color: #667eea;
+  font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .texture-selector {
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px 15px;
+    max-width: 95%;
+  }
+
+  .texture-label {
+    font-size: 12px;
+  }
+
+  .texture-options-wrapper {
+    max-width: 100%;
+  }
+
+  .texture-options {
+    gap: 12px;
+  }
+
+  .texture-image-wrapper {
+    width: 50px;
+    height: 50px;
+  }
+
+  .texture-name {
+    font-size: 10px;
+    max-width: 60px;
+  }
+}
+
+@media (max-width: 480px) {
+  .texture-selector {
+    padding: 8px 12px;
+  }
+
+  .texture-label {
+    font-size: 11px;
+  }
+
+  .texture-options {
+    gap: 10px;
+  }
+
+  .texture-image-wrapper {
+    width: 45px;
+    height: 45px;
+    border-width: 2px;
+  }
+
+  .texture-name {
+    font-size: 9px;
+    margin-top: 4px;
+  }
+}

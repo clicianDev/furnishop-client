@@ -1,14 +1,47 @@
 import React, { Suspense, useState } from 'react';
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useLoader } from '@react-three/fiber';
 import { OrbitControls, useGLTF, Stage, PerspectiveCamera } from '@react-three/drei';
+import * as THREE from 'three';
+import { EXRLoader } from 'three/examples/jsm/loaders/EXRLoader';
+import './Model3DViewer.css';
 
-function Model({ modelPath }) {
+const TEXTURES = [
+  { name: 'Plywood', folder: 'plywood', baseColor: '/textures/plywood/basecolor.jpg' },
+  { name: 'Dark Wood', folder: 'dark_wood', baseColor: '/textures/dark_wood/basecolor.jpg' },
+  { name: 'Oak Veneer', folder: 'oak_veener', baseColor: '/textures/oak_veener/basecolor.jpg' },
+  { name: 'Plywood Varnished', folder: 'plywood_varnished', baseColor: '/textures/plywood_varnished/basecolor.jpg' },
+];
+
+function Model({ modelPath, selectedTexture }) {
   const { scene } = useGLTF(modelPath);
+  const texturePath = `/textures/${selectedTexture.folder}`;
+  
+  // Load base color with TextureLoader
+  const colorMap = useLoader(THREE.TextureLoader, `${texturePath}/basecolor.jpg`);
+  
+  // Load EXR files with EXRLoader
+  const normalMap = useLoader(EXRLoader, `${texturePath}/normal.exr`);
+  const roughnessMap = useLoader(EXRLoader, `${texturePath}/roughness.exr`);
+
+  React.useEffect(() => {
+    scene.traverse((child) => {
+      if (child.isMesh) {
+        child.material = new THREE.MeshStandardMaterial({
+          map: colorMap,
+          normalMap: normalMap,
+          roughnessMap: roughnessMap,
+        });
+        child.material.needsUpdate = true;
+      }
+    });
+  }, [scene, colorMap, normalMap, roughnessMap]);
+
   return <primitive object={scene} />;
 }
 
 function Model3DViewer({ models, className, onModelChange, selectedModelIndex = 0 }) {
   const [currentModelIndex, setCurrentModelIndex] = useState(selectedModelIndex);
+  const [selectedTexture, setSelectedTexture] = useState(TEXTURES[0]); // Default to plywood
 
   // Handle case when models is a single string (backward compatibility)
   const modelsList = typeof models === 'string' ? [{ modelUrl: models, variantName: 'Default' }] : (models || []);
@@ -34,7 +67,7 @@ function Model3DViewer({ models, className, onModelChange, selectedModelIndex = 
       {modelsList.length > 1 && (
         <div className="model-selector" style={{
           position: 'absolute',
-          bottom: '10px',
+          top: '10px',
           left: '10px',
           zIndex: 10,
           background: 'rgba(255, 255, 255, 0.9)',
@@ -64,6 +97,31 @@ function Model3DViewer({ models, className, onModelChange, selectedModelIndex = 
           </select>
         </div>
       )}
+      
+      {/* Texture Selector */}
+      <div className="texture-selector">
+        <div className="texture-options-wrapper">
+          <div className="texture-options">
+            {TEXTURES.map((texture, index) => (
+              <div
+                key={index}
+                className={`texture-option ${selectedTexture.folder === texture.folder ? 'selected' : ''}`}
+                onClick={() => setSelectedTexture(texture)}
+              >
+                <div className="texture-image-wrapper">
+                  <img
+                    src={texture.baseColor}
+                    alt={texture.name}
+                    className="texture-image"
+                  />
+                </div>
+                <span className="texture-name">{texture.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       <Canvas
         shadows
         dpr={[1, 2]}
@@ -72,7 +130,7 @@ function Model3DViewer({ models, className, onModelChange, selectedModelIndex = 
       >
         <Suspense fallback={null}>
           <Stage environment="city" intensity={0.6}>
-            <Model modelPath={currentModel.modelUrl} />
+            <Model modelPath={currentModel.modelUrl} selectedTexture={selectedTexture} />
           </Stage>
         </Suspense>
         <OrbitControls 
