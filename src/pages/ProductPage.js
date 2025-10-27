@@ -208,19 +208,19 @@ const ProductPage = () => {
 
             {/* 3D/AR View Buttons */}
             <div className="view-buttons-container">
-              <button
+              {/* <button
                 onClick={() => setViewMode(viewMode === 'image' ? '3d' : 'image')}
                 className="btn-3d-view"
                 disabled={!product.models || product.models.length === 0}
               >
                 🎲 {viewMode === 'image' ? 'View in 3D' : 'View Image'}
-              </button>
+              </button> */}
               <button
                 onClick={() => navigate(`/3d-viewer/${id}`)}
                 className="btn-fullscreen-3d"
                 disabled={!product.models || product.models.length === 0}
               >
-                🎯 Fullscreen 3D / AR View
+                🎯 View in 3D / AR View
               </button>
             </div>
 

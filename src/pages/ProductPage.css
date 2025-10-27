@@ -247,12 +247,14 @@
 }
 
 .btn-fullscreen-3d {
-  background-color: #E17100;
-  color: white;
+    background-color: #ffffff;
+
+  color: #E17100;
   border: 1px solid #E17100;
 }
 
 .btn-fullscreen-3d:hover:not(:disabled) {
+    color: #ffffff;
   background-color: #C55F00;
   border-color: #C55F00;
   transform: translateY(-2px);
