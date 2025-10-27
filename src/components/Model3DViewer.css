@@ -175,54 +175,16 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  /* Hide selectors on mobile - they will be shown in footer */
+  .model-selector,
   .texture-selector {
-    left: 5px;
-    padding: 10px 6px;
-    gap: 10px;
-  }
-
-  .texture-label {
-    font-size: 10px;
-  }
-
-  .texture-options {
-    gap: 10px;
-  }
-
-  .texture-image-wrapper {
-    width: 45px;
-    height: 45px;
-  }
-
-  .texture-name {
-    font-size: 8px;
-    max-width: 50px;
+    display: none !important;
   }
 }
 
 @media (max-width: 480px) {
+  .model-selector,
   .texture-selector {
-    padding: 8px 5px;
-    gap: 8px;
-  }
-
-  .texture-label {
-    font-size: 9px;
-  }
-
-  .texture-options {
-    gap: 8px;
-  }
-
-  .texture-image-wrapper {
-    width: 40px;
-    height: 40px;
-    border-width: 2px;
-  }
-
-  .texture-name {
-    font-size: 7px;
-    margin-top: 3px;
-    max-width: 45px;
+    display: none !important;
   }
 }

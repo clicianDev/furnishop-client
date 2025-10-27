@@ -4,6 +4,37 @@ import api from '../config/axios';
 import Model3DViewer from '../components/Model3DViewer';
 import './Model3DViewerPage.css';
 
+const TEXTURES = [
+  { 
+    name: 'Plywood', 
+    folder: 'plywood', 
+    baseColor: '/textures/plywood/basecolor.jpg',
+    woodType: 'Plywood',
+    finish: 'Plain'
+  },
+  { 
+    name: 'Dark Wood', 
+    folder: 'dark_wood', 
+    baseColor: '/textures/dark_wood/basecolor.jpg',
+    woodType: 'Dark Wood',
+    finish: 'Varnished'
+  },
+  { 
+    name: 'Oak Veneer', 
+    folder: 'oak_veener', 
+    baseColor: '/textures/oak_veener/basecolor.jpg',
+    woodType: 'Oak Veneer',
+    finish: 'Plain'
+  },
+  { 
+    name: 'Plywood Varnished', 
+    folder: 'plywood_varnished', 
+    baseColor: '/textures/plywood_varnished/basecolor.jpg',
+    woodType: 'Plywood',
+    finish: 'Varnished'
+  },
+];
+
 const Model3DViewerPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -13,6 +44,8 @@ const Model3DViewerPage = () => {
   const [quantity, setQuantity] = useState(1);
   const [currentWoodType, setCurrentWoodType] = useState('Plywood');
   const [currentFinish, setCurrentFinish] = useState('Plain');
+  const [selectedTexture, setSelectedTexture] = useState(TEXTURES[0]);
+  const [currentModelIndex, setCurrentModelIndex] = useState(0);
 
   useEffect(() => {
     fetchProduct();
@@ -59,8 +92,13 @@ const Model3DViewerPage = () => {
   };
 
   const handleTextureChange = (texture) => {
+    setSelectedTexture(texture);
     setCurrentWoodType(texture.woodType);
     setCurrentFinish(texture.finish);
+  };
+
+  const handleMobileTextureChange = (texture) => {
+    handleTextureChange(texture);
   };
 
   if (loading) {
@@ -113,6 +151,9 @@ const Model3DViewerPage = () => {
               models={product.models}
               className="fullscreen-viewer"
               onTextureChange={handleTextureChange}
+              selectedModelIndex={currentModelIndex}
+              onModelChange={setCurrentModelIndex}
+              selectedTexture={selectedTexture}
             />
           ) : (
             <div className="no-model-placeholder">
@@ -161,6 +202,51 @@ const Model3DViewerPage = () => {
       {/* Bottom Action Bar */}
       <div className="viewer-footer">
         <div className="footer-content">
+          
+        {/* Mobile Selectors */}
+        <div className="mobile-selectors">
+          {/* Model Selector */}
+          {product.models && product.models.length > 1 && (
+            <div className="mobile-model-selector">
+              <label>Model Variant:</label>
+              <select
+                value={currentModelIndex}
+                onChange={(e) => setCurrentModelIndex(parseInt(e.target.value))}
+              >
+                {product.models.map((model, index) => (
+                  <option key={index} value={index}>
+                    {model.variantName || `Model ${index + 1}`}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Texture Selector */}
+          <div className="mobile-texture-selector">
+            <p className="mobile-texture-selector-label">Wood Texture:</p>
+            <div className="mobile-texture-options-wrapper">
+              <div className="mobile-texture-options">
+                {TEXTURES.map((texture, index) => (
+                  <div
+                    key={index}
+                    className={`mobile-texture-option ${selectedTexture.folder === texture.folder ? 'selected' : ''}`}
+                    onClick={() => handleMobileTextureChange(texture)}
+                  >
+                    <div className="mobile-texture-image-wrapper">
+                      <img
+                        src={texture.baseColor}
+                        alt={texture.name}
+                        className="mobile-texture-image"
+                      />
+                    </div>
+                    <span className="mobile-texture-name">{texture.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
           {/* View Mode Toggle */}
           <div className="view-mode-toggle">
             <button 

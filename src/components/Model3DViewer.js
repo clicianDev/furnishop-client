@@ -77,9 +77,21 @@ function Model({ modelPath, selectedTexture }) {
   return <primitive object={scene} />;
 }
 
-function Model3DViewer({ models, className, onModelChange, onTextureChange, selectedModelIndex = 0 }) {
+function Model3DViewer({ models, className, onModelChange, onTextureChange, selectedModelIndex = 0, selectedTexture: externalSelectedTexture }) {
   const [currentModelIndex, setCurrentModelIndex] = useState(selectedModelIndex);
-  const [selectedTexture, setSelectedTexture] = useState(TEXTURES[0]); // Default to plywood
+  const [selectedTexture, setSelectedTexture] = useState(externalSelectedTexture || TEXTURES[0]); // Default to plywood
+
+  // Sync with external selectedModelIndex prop
+  React.useEffect(() => {
+    setCurrentModelIndex(selectedModelIndex);
+  }, [selectedModelIndex]);
+
+  // Sync with external selectedTexture prop
+  React.useEffect(() => {
+    if (externalSelectedTexture) {
+      setSelectedTexture(externalSelectedTexture);
+    }
+  }, [externalSelectedTexture]);
 
   // Handle case when models is a single string (backward compatibility)
   const modelsList = typeof models === 'string' ? [{ modelUrl: models, variantName: 'Default' }] : (models || []);
