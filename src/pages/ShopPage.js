@@ -58,40 +58,45 @@ const ShopPage = () => {
   };
 
   if (loading) {
-    return <div className="container">Loading wooden furniture...</div>;
+    return (
+      <div className="shop-page">
+        <div className="container">
+          <div className="loading-state">Loading wooden furniture...</div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="shop-page container">
-      <h1>Wooden Furniture Collection</h1>
+    <div className="shop-page">
+      <div className="container">
+        <h1>Wooden Furniture Collection</h1>
+        <p>Discover premium handcrafted furniture pieces for your home</p>
       
-      <div className="filters">
-        <input
-          type="text"
-          placeholder="Search for furniture..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="search-input"
-        />
-        
-        <select 
-          value={selectedCategory} 
-          onChange={(e) => setSelectedCategory(e.target.value)}
-          className="category-select"
-        >
-          {categories.map(category => (
-            <option key={category} value={category}>
-              {category}
-            </option>
-          ))}
-        </select>
-      </div>
+        <div className="filters">
+          <input
+            type="text"
+            placeholder="Search for furniture..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-input"
+          />
+          
+          <select 
+            value={selectedCategory} 
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="category-select"
+          >
+            {categories.map(category => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+        </div>
 
-      <div className="grid grid-4">
-        {filteredProducts.length === 0 ? (
-          <p className="no-products">No furniture found matching your criteria.</p>
-        ) : (
-          filteredProducts.map(product => (
+        <div className="grid grid-4">
+          {(filteredProducts.length > 0 ? filteredProducts : products).map(product => (
             <div key={product._id} className="product-card">
               <Link to={`/product/${product._id}`}>
                 <img 
@@ -111,8 +116,8 @@ const ShopPage = () => {
                 View Details
               </Link>
             </div>
-          ))
-        )}
+          ))}
+        </div>
       </div>
     </div>
   );
