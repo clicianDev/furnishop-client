@@ -11,6 +11,8 @@ const Model3DViewerPage = () => {
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState('3d');
   const [quantity, setQuantity] = useState(1);
+  const [currentWoodType, setCurrentWoodType] = useState('Plywood');
+  const [currentFinish, setCurrentFinish] = useState('Plain');
 
   useEffect(() => {
     fetchProduct();
@@ -54,6 +56,11 @@ const Model3DViewerPage = () => {
 
   const handleClose = () => {
     navigate(-1);
+  };
+
+  const handleTextureChange = (texture) => {
+    setCurrentWoodType(texture.woodType);
+    setCurrentFinish(texture.finish);
   };
 
   if (loading) {
@@ -105,6 +112,7 @@ const Model3DViewerPage = () => {
             <Model3DViewer 
               models={product.models}
               className="fullscreen-viewer"
+              onTextureChange={handleTextureChange}
             />
           ) : (
             <div className="no-model-placeholder">
@@ -136,11 +144,11 @@ const Model3DViewerPage = () => {
             </div>
             <div className="info-item">
               <p className="info-label">Wood Type</p>
-              <p className="info-value">{product.woodType || 'Gmelina'}</p>
+              <p className="info-value">{currentWoodType}</p>
             </div>
             <div className="info-item">
               <p className="info-label">Finish</p>
-              <p className="info-value">{product.finish || 'Varnish (Semi-Gloss)'}</p>
+              <p className="info-value">{currentFinish}</p>
             </div>
             <div className="info-item">
               <p className="info-label">Stock</p>
@@ -212,8 +220,8 @@ const Model3DViewerPage = () => {
             <p className="mobile-price">₱{product.price.toLocaleString()}</p>
           </div>
           <div className="mobile-info-right">
-            <p className="mobile-label">{product.woodType || 'Gmelina'} Wood</p>
-            <p className="mobile-text">{product.finish || 'Varnish'}</p>
+            <p className="mobile-label">{currentWoodType} Wood</p>
+            <p className="mobile-text">{currentFinish}</p>
           </div>
         </div>
       </div>

@@ -6,10 +6,34 @@ import { EXRLoader } from 'three/examples/jsm/loaders/EXRLoader';
 import './Model3DViewer.css';
 
 const TEXTURES = [
-  { name: 'Plywood', folder: 'plywood', baseColor: '/textures/plywood/basecolor.jpg' },
-  { name: 'Dark Wood', folder: 'dark_wood', baseColor: '/textures/dark_wood/basecolor.jpg' },
-  { name: 'Oak Veneer', folder: 'oak_veener', baseColor: '/textures/oak_veener/basecolor.jpg' },
-  { name: 'Plywood Varnished', folder: 'plywood_varnished', baseColor: '/textures/plywood_varnished/basecolor.jpg' },
+  { 
+    name: 'Plywood', 
+    folder: 'plywood', 
+    baseColor: '/textures/plywood/basecolor.jpg',
+    woodType: 'Plywood',
+    finish: 'Plain'
+  },
+  { 
+    name: 'Dark Wood', 
+    folder: 'dark_wood', 
+    baseColor: '/textures/dark_wood/basecolor.jpg',
+    woodType: 'Dark Wood',
+    finish: 'Varnish'
+  },
+  { 
+    name: 'Oak Veneer', 
+    folder: 'oak_veener', 
+    baseColor: '/textures/oak_veener/basecolor.jpg',
+    woodType: 'Oak Veneer',
+    finish: 'Plain'
+  },
+  { 
+    name: 'Plywood Varnish', 
+    folder: 'plywood_varnished', 
+    baseColor: '/textures/plywood_varnished/basecolor.jpg',
+    woodType: 'Plywood',
+    finish: 'Varnish'
+  },
 ];
 
 function Model({ modelPath, selectedTexture }) {
@@ -25,13 +49,18 @@ function Model({ modelPath, selectedTexture }) {
 
   React.useEffect(() => {
     scene.traverse((child) => {
-      if (child.isMesh) {
-        child.material = new THREE.MeshStandardMaterial({
-          map: colorMap,
-          normalMap: normalMap,
-          roughnessMap: roughnessMap,
-        });
-        child.material.needsUpdate = true;
+      if (child.isMesh && child.material) {
+        // Check if the material name is "base" (case-insensitive)
+        const materialName = child.material.name ? child.material.name.toLowerCase() : '';
+        
+        if (materialName === 'base') {
+          child.material = new THREE.MeshStandardMaterial({
+            map: colorMap,
+            normalMap: normalMap,
+            roughnessMap: roughnessMap,
+          });
+          child.material.needsUpdate = true;
+        }
       }
     });
   }, [scene, colorMap, normalMap, roughnessMap]);
@@ -39,7 +68,7 @@ function Model({ modelPath, selectedTexture }) {
   return <primitive object={scene} />;
 }
 
-function Model3DViewer({ models, className, onModelChange, selectedModelIndex = 0 }) {
+function Model3DViewer({ models, className, onModelChange, onTextureChange, selectedModelIndex = 0 }) {
   const [currentModelIndex, setCurrentModelIndex] = useState(selectedModelIndex);
   const [selectedTexture, setSelectedTexture] = useState(TEXTURES[0]); // Default to plywood
 
@@ -54,28 +83,37 @@ function Model3DViewer({ models, className, onModelChange, selectedModelIndex = 
     }
   };
 
+  const handleTextureChange = (texture) => {
+    setSelectedTexture(texture);
+    if (onTextureChange) {
+      onTextureChange(texture);
+    }
+  };
+
   if (!currentModel) {
     return (
-      <div className={className} style={{ width: '100%', height: '500px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f0f0f0' }}>
+      <div className={className} style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f0f0f0' }}>
         <p>No 3D model available</p>
       </div>
     );
   }
 
   return (
-    <div className={className} style={{ width: '100%', height: '500px', position: 'relative' }}>
+    <div className={className} style={{ width: '100%', height: '100%', position: 'relative' }}>
       {modelsList.length > 1 && (
         <div className="model-selector" style={{
           position: 'absolute',
           top: '10px',
           left: '10px',
           zIndex: 10,
-          background: 'rgba(255, 255, 255, 0.9)',
+          background: 'rgba(0, 0, 0, 0.85)',
           padding: '10px',
           borderRadius: '8px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+          boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+          backdropFilter: 'blur(8px)',
+          border: '1px solid rgba(255, 255, 255, 0.1)'
         }}>
-          <label style={{ fontWeight: 'bold', marginBottom: '5px', display: 'block', fontSize: '14px' }}>
+          <label style={{ fontWeight: 'bold', marginBottom: '5px', display: 'block', fontSize: '14px', color: 'white' }}>
             Select Model Variant:
           </label>
           <select
@@ -84,9 +122,11 @@ function Model3DViewer({ models, className, onModelChange, selectedModelIndex = 
             style={{
               padding: '5px 10px',
               borderRadius: '4px',
-              border: '1px solid #ccc',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
               fontSize: '14px',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              background: 'rgba(0, 0, 0, 0.5)',
+              color: 'white'
             }}
           >
             {modelsList.map((model, index) => (
@@ -106,7 +146,7 @@ function Model3DViewer({ models, className, onModelChange, selectedModelIndex = 
               <div
                 key={index}
                 className={`texture-option ${selectedTexture.folder === texture.folder ? 'selected' : ''}`}
-                onClick={() => setSelectedTexture(texture)}
+                onClick={() => handleTextureChange(texture)}
               >
                 <div className="texture-image-wrapper">
                   <img
