@@ -11,14 +11,14 @@ const TEXTURES = [
     folder: 'plywood', 
     baseColor: '/textures/plywood/basecolor.jpg',
     woodType: 'Plywood',
-    finish: 'Plain'
+    finish: 'Clear Gloss Varnish'
   },
   { 
     name: 'Dark Wood', 
     folder: 'dark_wood', 
     baseColor: '/textures/dark_wood/basecolor.jpg',
     woodType: 'Dark Wood',
-    finish: 'Varnish'
+    finish: 'Natural Varnish'
   },
   { 
     name: 'Oak Veneer', 
@@ -32,7 +32,7 @@ const TEXTURES = [
     folder: 'plywood_varnished', 
     baseColor: '/textures/plywood_varnished/basecolor.jpg',
     woodType: 'Plywood',
-    finish: 'Varnish'
+    finish: 'Natural Varnish'
   },
 ];
 
@@ -54,12 +54,21 @@ function Model({ modelPath, selectedTexture }) {
         const materialName = child.material.name ? child.material.name.toLowerCase() : '';
         
         if (materialName === 'base') {
-          child.material = new THREE.MeshStandardMaterial({
-            map: colorMap,
-            normalMap: normalMap,
-            roughnessMap: roughnessMap,
-          });
-          child.material.needsUpdate = true;
+          // Update existing material or create new one
+          if (child.material.isMeshStandardMaterial) {
+            child.material.map = colorMap;
+            child.material.normalMap = normalMap;
+            child.material.roughnessMap = roughnessMap;
+            child.material.needsUpdate = true;
+          } else {
+            const newMaterial = new THREE.MeshStandardMaterial({
+              map: colorMap,
+              normalMap: normalMap,
+              roughnessMap: roughnessMap,
+            });
+            newMaterial.name = 'base';
+            child.material = newMaterial;
+          }
         }
       }
     });
