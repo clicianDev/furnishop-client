@@ -192,14 +192,14 @@ const Model3DViewerPage = () => {
           )}
           
           {/* AR Instructions - Only show in AR mode */}
-          {viewMode === 'ar' && product.models && product.models.length > 0 && (
+          {/* {viewMode === 'ar' && product.models && product.models.length > 0 && (
             <div className="ar-info-overlay">
               <div className="ar-info-content">
                 <p>📱 Tap "Enter AR" to start the experience</p>
                 <small>Point your camera at a flat surface and tap to place furniture</small>
               </div>
             </div>
-          )}
+          )} */}
         </div>
 
         {/* Side Info Panel (Desktop) */}

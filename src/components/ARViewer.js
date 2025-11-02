@@ -157,7 +157,23 @@ function ARViewer({ models, selectedTexture, onARControlsReady }) {
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-      <Canvas>
+      {/* AR Instructions Overlay - Render before Canvas for proper z-index stacking */}
+      {/* {!arStarted && (
+        <div className="ar-instructions">
+          <div className="ar-instruction-content">
+            <h3>🎯 AR Mode Ready</h3>
+            <p>Tap the "Start AR" button below to begin</p>
+            <ul className="ar-steps">
+              <li>Point your camera at a flat surface</li>
+              <li>Wait for the placement indicator</li>
+              <li>Tap the screen to place the furniture</li>
+              <li>Rotate and scale with gestures</li>
+            </ul>
+          </div>
+        </div>
+      )} */}
+      
+      <Canvas style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
         <XR
           referenceSpace="local-floor"
           onSessionStart={() => setArStarted(true)}
@@ -171,22 +187,6 @@ function ARViewer({ models, selectedTexture, onARControlsReady }) {
           </Suspense>
         </XR>
       </Canvas>
-
-      {/* AR Instructions Overlay */}
-      {!arStarted && (
-        <div className="ar-instructions">
-          <div className="ar-instruction-content">
-            <h3>🎯 AR Mode Ready</h3>
-            <p>Tap the "Start AR" button below to begin</p>
-            <ul className="ar-steps">
-              <li>Point your camera at a flat surface</li>
-              <li>Wait for the placement indicator</li>
-              <li>Tap the screen to place the furniture</li>
-              <li>Rotate and scale with gestures</li>
-            </ul>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
