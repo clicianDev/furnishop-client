@@ -199,3 +199,118 @@
     font-size: 24px;
   }
 }
+
+/* iOS AR Quick Look Styles */
+.ar-ios-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+}
+
+.ar-ios-content {
+  text-align: center;
+  color: white;
+  max-width: 400px;
+  padding: 40px 30px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.ar-ios-preview {
+  margin-bottom: 30px;
+}
+
+.ar-ios-preview h3 {
+  font-size: 28px;
+  margin: 20px 0 10px 0;
+  font-weight: 600;
+}
+
+.ar-ios-preview p {
+  font-size: 16px;
+  opacity: 0.9;
+  margin-bottom: 0;
+}
+
+.ar-quicklook-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px 32px;
+  background: white;
+  color: #333;
+  text-decoration: none;
+  border-radius: 50px;
+  font-size: 18px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  margin: 20px 0;
+}
+
+.ar-quicklook-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 30px rgba(0, 0, 0, 0.3);
+}
+
+.ar-quicklook-button:active {
+  transform: scale(0.98);
+}
+
+.ar-quicklook-button img {
+  width: 24px;
+  height: 24px;
+}
+
+.ar-ios-note {
+  display: block;
+  margin-top: 20px;
+  font-size: 13px;
+  opacity: 0.7;
+  line-height: 1.5;
+}
+
+.ar-ios-info {
+  margin: 20px 0;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.ar-ios-info p {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.ar-ios-info ul {
+  margin: 10px 0;
+}
+
+.ar-ios-info ul li {
+  margin: 8px 0;
+}
+
+@media (max-width: 768px) {
+  .ar-ios-content {
+    padding: 30px 20px;
+    max-width: 90%;
+  }
+
+  .ar-ios-preview h3 {
+    font-size: 24px;
+  }
+
+  .ar-quicklook-button {
+    font-size: 16px;
+    padding: 14px 28px;
+  }
+}

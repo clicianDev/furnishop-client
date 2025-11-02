@@ -116,9 +116,18 @@ function ARModel({ modelPath, selectedTexture }) {
 function ARViewer({ models, selectedTexture, onARControlsReady }) {
   const [isARSupported, setIsARSupported] = useState(true);
   const [arStarted, setArStarted] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
-    if (navigator.xr) {
+    // Detect iOS devices
+    const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    setIsIOS(iOS);
+
+    if (iOS) {
+      // iOS devices support AR through AR Quick Look
+      setIsARSupported(true);
+    } else if (navigator.xr) {
       navigator.xr.isSessionSupported('immersive-ar').then((supported) => {
         setIsARSupported(supported);
       });
@@ -130,7 +139,7 @@ function ARViewer({ models, selectedTexture, onARControlsReady }) {
   const modelsList = typeof models === 'string' ? [{ modelUrl: models, variantName: 'Default' }] : (models || []);
   const currentModel = modelsList[0]; // Use first model for AR
 
-  if (!isARSupported) {
+  if (!isARSupported && !isIOS) {
     return (
       <div className="ar-not-supported">
         <div className="ar-message">
@@ -155,6 +164,57 @@ function ARViewer({ models, selectedTexture, onARControlsReady }) {
     );
   }
 
+  // iOS AR Quick Look Support
+  if (isIOS) {
+    return (
+      <div className="ar-ios-container">
+        <div className="ar-ios-content">
+          <div className="ar-ios-preview">
+            <span className="ar-icon" style={{ fontSize: '80px' }}>🪑</span>
+            <h3>iOS AR Support</h3>
+            <p>AR viewing on iOS is available</p>
+          </div>
+          
+          {/* Check if model is USDZ format for AR Quick Look */}
+          {currentModel.modelUrl && currentModel.modelUrl.endsWith('.usdz') ? (
+            <>
+              <a
+                href={currentModel.modelUrl}
+                rel="ar"
+                className="ar-quicklook-button"
+              >
+                <img
+                  src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEyIDJMMyA3djEwbDkgNSA5LTVWN3ptMCAxOGwtNy0zLjg5VjguMTFMMTIgNGw3IDQuMTF2Ny45OXoiIGZpbGw9IndoaXRlIi8+PC9zdmc+"
+                  alt="AR"
+                />
+                View in AR (AR Quick Look)
+              </a>
+              <small className="ar-ios-note">
+                Requires iOS 12+ with ARKit support
+              </small>
+            </>
+          ) : (
+            <>
+              <div className="ar-ios-info">
+                <p style={{ marginBottom: '15px' }}>
+                  For full AR experience on iOS, please use:
+                </p>
+                <ul style={{ textAlign: 'left', padding: '0 20px', fontSize: '14px', lineHeight: '1.8' }}>
+                  <li>Safari browser with WebXR Viewer extension</li>
+                  <li>Or convert model to USDZ format for AR Quick Look</li>
+                </ul>
+              </div>
+              <small className="ar-ios-note">
+                Currently viewing GLB model. Switch to 3D view for interactive preview.
+              </small>
+            </>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Android WebXR Support
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
       {/* AR Instructions Overlay - Render before Canvas for proper z-index stacking */}
