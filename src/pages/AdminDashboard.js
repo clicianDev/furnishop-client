@@ -1,33 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import api from '../config/axios';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('products');
-  const [users, setUsers] = useState([]);
-  const [products, setProducts] = useState([]);
-  const [transactions, setTransactions] = useState([]);
+  const [stats, setStats] = useState({
+    totalSales: 0,
+    totalOrders: 0,
+    totalProducts: 0,
+    totalUsers: 0
+  });
+  const [recentOrders, setRecentOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // Product form state
-  const [productForm, setProductForm] = useState({
-    name: '',
-    description: '',
-    price: '',
-    category: 'Sofas',
-    stock: '',
-    image: '',
-    models: []
-  });
-  const [editingProductId, setEditingProductId] = useState(null);
-  const [currentModel, setCurrentModel] = useState({
-    modelUrl: '',
-    price: '',
-    description: '',
-    variantName: ''
-  });
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -36,479 +21,210 @@ const AdminDashboard = () => {
       navigate('/login');
       return;
     }
-    fetchData();
-  }, [activeTab]);
+    fetchDashboardData();
+  }, [navigate]);
 
-  const fetchData = async () => {
+  const fetchDashboardData = async () => {
     try {
-      if (activeTab === 'users') {
-        const response = await api.get('/api/users');
-        setUsers(response.data);
-      } else if (activeTab === 'products') {
-        const response = await api.get('/api/products');
-        setProducts(Array.isArray(response.data) ? response.data : []);
-      } else if (activeTab === 'transactions') {
-        const response = await api.get('/api/transactions');
-        setTransactions(response.data);
-      }
-      setLoading(false);
-    } catch (error) {
-      console.error('Failed to fetch data:', error);
-      setLoading(false);
-    }
-  };
+      // Fetch all data concurrently
+      const [productsRes, usersRes, transactionsRes] = await Promise.all([
+        api.get('/api/products'),
+        api.get('/api/users'),
+        api.get('/api/transactions')
+      ]);
 
-  // Product Management
-  const handleProductInputChange = (e) => {
-    setProductForm({
-      ...productForm,
-      [e.target.name]: e.target.value
-    });
-  };
+      const products = Array.isArray(productsRes.data) ? productsRes.data : [];
+      const users = Array.isArray(usersRes.data) ? usersRes.data : [];
+      const transactions = Array.isArray(transactionsRes.data) ? transactionsRes.data : [];
 
-  const handleProductSubmit = async (e) => {
-    e.preventDefault();
-    
-    try {
-      if (editingProductId) {
-        await api.put(`/api/products/${editingProductId}`, productForm);
-        alert('Product updated successfully!');
-      } else {
-        await api.post('/api/products', productForm);
-        alert('Product created successfully!');
-      }
+      // Calculate stats
+      const totalSales = transactions.reduce((sum, t) => sum + (t.totalAmount || 0), 0);
       
-      setProductForm({ name: '', description: '', price: '', category: 'Sofas', stock: '', image: '', models: [] });
-      setEditingProductId(null);
-      setCurrentModel({ modelUrl: '', price: '', description: '', variantName: '' });
-      fetchData();
+      setStats({
+        totalSales,
+        totalOrders: transactions.length,
+        totalProducts: products.length,
+        totalUsers: users.length
+      });
+
+      // Get recent orders (last 4)
+      const recent = transactions
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 4)
+        .map(t => ({
+          id: t._id,
+          customer: t.userId?.name || 'Guest',
+          amount: t.totalAmount,
+          status: t.status,
+          date: new Date(t.createdAt).toLocaleDateString()
+        }));
+      
+      setRecentOrders(recent);
+      setLoading(false);
     } catch (error) {
-      alert('Failed to save product');
+      console.error('Failed to fetch dashboard data:', error);
+      setLoading(false);
     }
   };
 
-  const handleEditProduct = (product) => {
-    setProductForm({
-      name: product.name,
-      description: product.description,
-      price: product.price,
-      category: product.category,
-      stock: product.stock,
-      image: product.image || '',
-      models: product.models || []
-    });
-    setEditingProductId(product._id);
-  };
-
-  const handleAddModel = () => {
-    if (!currentModel.modelUrl || !currentModel.price || !currentModel.description || !currentModel.variantName) {
-      alert('Please fill all model fields');
-      return;
-    }
-    
-    setProductForm({
-      ...productForm,
-      models: [...productForm.models, { ...currentModel, price: parseFloat(currentModel.price) }]
-    });
-    
-    setCurrentModel({
-      modelUrl: '',
-      price: '',
-      description: '',
-      variantName: ''
-    });
-  };
-
-  const handleRemoveModel = (index) => {
-    const updatedModels = productForm.models.filter((_, i) => i !== index);
-    setProductForm({
-      ...productForm,
-      models: updatedModels
-    });
-  };
-
-  const handleModelInputChange = (e) => {
-    setCurrentModel({
-      ...currentModel,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  const handleDeleteProduct = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this product?')) return;
-    
-    try {
-      await api.delete(`/api/products/${id}`);
-      alert('Product deleted successfully!');
-      fetchData();
-    } catch (error) {
-      alert('Failed to delete product');
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'delivered':
+        return 'status-delivered';
+      case 'processing':
+        return 'status-processing';
+      case 'shipped':
+        return 'status-shipped';
+      case 'pending':
+        return 'status-pending';
+      case 'cancelled':
+        return 'status-cancelled';
+      default:
+        return 'status-pending';
     }
   };
 
-  // User Management
-  const handleDeleteUser = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this user?')) return;
-    
-    try {
-      await api.delete(`/api/users/${id}`);
-      alert('User deleted successfully!');
-      fetchData();
-    } catch (error) {
-      alert('Failed to delete user');
-    }
-  };
-
-  // Transaction Management
-  const handleUpdateTransactionStatus = async (id, status) => {
-    try {
-      await api.put(`/api/transactions/${id}`, { status });
-      alert('Transaction status updated!');
-      fetchData();
-    } catch (error) {
-      alert('Failed to update transaction status');
-    }
-  };
-
-  if (loading) return <div className="container">Loading...</div>;
+  if (loading) return <div className="dashboard-loading">Loading...</div>;
 
   return (
-    <div className="admin-dashboard container">
-      <h1>Admin Dashboard</h1>
-
-      <div className="tabs">
-        <button
-          className={`tab ${activeTab === 'products' ? 'active' : ''}`}
-          onClick={() => setActiveTab('products')}
-        >
-          Products
-        </button>
-        <button
-          className={`tab ${activeTab === 'users' ? 'active' : ''}`}
-          onClick={() => setActiveTab('users')}
-        >
-          Users
-        </button>
-        <button
-          className={`tab ${activeTab === 'transactions' ? 'active' : ''}`}
-          onClick={() => setActiveTab('transactions')}
-        >
-          Transactions
-        </button>
+    <div className="dashboard-page">
+      {/* Header */}
+      <div className="dashboard-header">
+        <div>
+          <h1 className="dashboard-title">Dashboard</h1>
+          <p className="dashboard-subtitle">Welcome back! Here's what's happening today.</p>
+        </div>
       </div>
 
-      <div className="tab-content">
-        {activeTab === 'products' && (
-          <div className="products-management">
-            <div className="card">
-              <h2>{editingProductId ? 'Edit Product' : 'Add New Product'}</h2>
-              <form onSubmit={handleProductSubmit}>
-                <div className="form-group">
-                  <label>Product Name</label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={productForm.name}
-                    onChange={handleProductInputChange}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Description</label>
-                  <textarea
-                    name="description"
-                    value={productForm.description}
-                    onChange={handleProductInputChange}
-                    required
-                    rows="4"
-                  />
-                </div>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Price</label>
-                    <input
-                      type="number"
-                      name="price"
-                      value={productForm.price}
-                      onChange={handleProductInputChange}
-                      required
-                      step="0.01"
-                      min="0"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Category</label>
-                    <select
-                      name="category"
-                      value={productForm.category}
-                      onChange={handleProductInputChange}
-                      required
-                    >
-                      <option value="Sofas">Sofas</option>
-                      <option value="Beds">Beds</option>
-                      <option value="Chairs">Chairs</option>
-                      <option value="Tables">Tables</option>
-                      <option value="Cabinets">Cabinets</option>
-                      <option value="Wardrobes">Wardrobes</option>
-                      <option value="Doors">Doors</option>
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label>Stock</label>
-                    <input
-                      type="number"
-                      name="stock"
-                      value={productForm.stock}
-                      onChange={handleProductInputChange}
-                      required
-                      min="0"
-                    />
-                  </div>
-                </div>
-                <div className="form-group">
-                  <label>Image URL</label>
-                  <input
-                    type="url"
-                    name="image"
-                    value={productForm.image}
-                    onChange={handleProductInputChange}
-                    placeholder="https://example.com/image.jpg"
-                  />
-                </div>
-
-                {/* 3D Models Section */}
-                <div className="models-section">
-                  <h3>3D Model Variants</h3>
-                  <div className="model-input-group">
-                    <div className="form-row">
-                      <div className="form-group">
-                        <label>Variant Name</label>
-                        <input
-                          type="text"
-                          name="variantName"
-                          value={currentModel.variantName}
-                          onChange={handleModelInputChange}
-                          placeholder="e.g., Cabinet Style 1"
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label>Model URL</label>
-                        <input
-                          type="url"
-                          name="modelUrl"
-                          value={currentModel.modelUrl}
-                          onChange={handleModelInputChange}
-                          placeholder="https://example.com/model.glb or /models/cabinet/cabinet-1.glb"
-                        />
-                      </div>
-                    </div>
-                    <div className="form-row">
-                      <div className="form-group">
-                        <label>Variant Price</label>
-                        <input
-                          type="number"
-                          name="price"
-                          value={currentModel.price}
-                          onChange={handleModelInputChange}
-                          placeholder="0.00"
-                          step="0.01"
-                          min="0"
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label>Variant Description</label>
-                        <textarea
-                          name="description"
-                          value={currentModel.description}
-                          onChange={handleModelInputChange}
-                          placeholder="Description for this variant"
-                          rows="2"
-                        />
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleAddModel}
-                      className="btn btn-secondary"
-                      style={{ marginBottom: '10px' }}
-                    >
-                      Add Model Variant
-                    </button>
-                  </div>
-
-                  {/* Display added models */}
-                  {productForm.models.length > 0 && (
-                    <div className="models-list">
-                      <h4>Added Models ({productForm.models.length})</h4>
-                      {productForm.models.map((model, index) => (
-                        <div key={index} className="model-item" style={{
-                          padding: '10px',
-                          border: '1px solid #ddd',
-                          borderRadius: '4px',
-                          marginBottom: '10px',
-                          background: '#f9f9f9'
-                        }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-                            <div>
-                              <strong>{model.variantName}</strong>
-                              <p style={{ margin: '5px 0', fontSize: '0.9em' }}>Price: ₱{model.price}</p>
-                              <p style={{ margin: '5px 0', fontSize: '0.9em', color: '#666' }}>{model.description}</p>
-                              <p style={{ margin: '5px 0', fontSize: '0.8em', color: '#888', wordBreak: 'break-all' }}>
-                                URL: {model.modelUrl}
-                              </p>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveModel(index)}
-                              className="btn btn-danger btn-sm"
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div className="form-actions">
-                  <button type="submit" className="btn btn-primary">
-                    {editingProductId ? 'Update Product' : 'Add Product'}
-                  </button>
-                  {editingProductId && (
-                    <button
-                      type="button"
-                      className="btn btn-secondary"
-                      onClick={() => {
-                        setEditingProductId(null);
-                        setProductForm({ name: '', description: '', price: '', category: 'Sofas', stock: '', image: '', models: [] });
-                        setCurrentModel({ modelUrl: '', price: '', description: '', variantName: '' });
-                      }}
-                    >
-                      Cancel
-                    </button>
-                  )}
-                </div>
-              </form>
+      {/* Stats Grid */}
+      <div className="stats-grid">
+        <div className="stat-card">
+          <div className="stat-header">
+            <div className="stat-icon stat-icon-green">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="12" y1="1" x2="12" y2="23"></line>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+              </svg>
             </div>
+          </div>
+          <p className="stat-label">Total Sales</p>
+          <p className="stat-value">₱{stats.totalSales.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+        </div>
 
-            <div className="products-list">
-              <h2>All Products</h2>
-              <div className="table-container">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Category</th>
-                      <th>Price</th>
-                      <th>Stock</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {products.map(product => (
-                      <tr key={product._id}>
-                        <td>{product.name}</td>
-                        <td>{product.category}</td>
-                        <td>₱{product.price.toFixed(2)}</td>
-                        <td>{product.stock}</td>
-                        <td className="action-buttons">
-                          <button
-                            onClick={() => handleEditProduct(product)}
-                            className="btn btn-secondary btn-sm"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDeleteProduct(product._id)}
-                            className="btn btn-danger btn-sm"
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+        <div className="stat-card">
+          <div className="stat-header">
+            <div className="stat-icon stat-icon-blue">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <path d="M16 10a4 4 0 0 1-8 0"></path>
+              </svg>
+            </div>
+          </div>
+          <p className="stat-label">Total Orders</p>
+          <p className="stat-value">{stats.totalOrders}</p>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-header">
+            <div className="stat-icon stat-icon-amber">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="16.5" y1="9.4" x2="7.5" y2="4.21"></line>
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+              </svg>
+            </div>
+          </div>
+          <p className="stat-label">Products</p>
+          <p className="stat-value">{stats.totalProducts}</p>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-header">
+            <div className="stat-icon stat-icon-purple">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+            </div>
+          </div>
+          <p className="stat-label">Customers</p>
+          <p className="stat-value">{stats.totalUsers}</p>
+        </div>
+      </div>
+
+      <div className="dashboard-content">
+        {/* Recent Orders */}
+        <div className="dashboard-card orders-card">
+          <div className="card-header">
+            <h2 className="card-title">Recent Orders</h2>
+            <Link to="/admin/transactions" className="view-all-link">View All</Link>
+          </div>
+          <div className="orders-list">
+            {recentOrders.length > 0 ? (
+              recentOrders.map((order) => (
+                <div key={order.id} className="order-item">
+                  <div className="order-info">
+                    <p className="order-id">#{order.id.substring(0, 8)}</p>
+                    <p className="order-customer">{order.customer}</p>
+                  </div>
+                  <div className="order-details">
+                    <p className="order-amount">₱{order.amount.toLocaleString()}</p>
+                    <span className={`order-status ${getStatusColor(order.status)}`}>
+                      {order.status}
+                    </span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="no-data">No recent orders</p>
+            )}
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="dashboard-card actions-card">
+          <h2 className="card-title">Quick Actions</h2>
+          <div className="actions-list">
+            <Link to="/admin/products" className="action-item">
+              <div className="action-icon action-icon-amber">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="16.5" y1="9.4" x2="7.5" y2="4.21"></line>
+                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                  <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                  <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                </svg>
               </div>
-            </div>
-          </div>
-        )}
+              <span className="action-label">Manage Products</span>
+            </Link>
 
-        {activeTab === 'users' && (
-          <div className="users-management">
-            <h2>All Users</h2>
-            <div className="table-container card">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Created</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.map(user => (
-                    <tr key={user._id}>
-                      <td>{user.name}</td>
-                      <td>{user.email}</td>
-                      <td><span className={`role-badge ${user.role}`}>{user.role}</span></td>
-                      <td>{new Date(user.createdAt).toLocaleDateString()}</td>
-                      <td className="action-buttons">
-                        <button
-                          onClick={() => handleDeleteUser(user._id)}
-                          className="btn btn-danger btn-sm"
-                          disabled={user.role === 'admin'}
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
+            <Link to="/admin/transactions" className="action-item">
+              <div className="action-icon action-icon-blue">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                  <line x1="3" y1="6" x2="21" y2="6"></line>
+                  <path d="M16 10a4 4 0 0 1-8 0"></path>
+                </svg>
+              </div>
+              <span className="action-label">Manage Orders</span>
+            </Link>
 
-        {activeTab === 'transactions' && (
-          <div className="transactions-management">
-            <h2>All Transactions</h2>
-            <div className="transactions-list">
-              {transactions.map(transaction => (
-                <div key={transaction._id} className="transaction-card card">
-                  <div className="transaction-header">
-                    <h3>Order #{transaction._id.substring(0, 8)}</h3>
-                    <select
-                      value={transaction.status}
-                      onChange={(e) => handleUpdateTransactionStatus(transaction._id, e.target.value)}
-                      className="status-select"
-                    >
-                      <option value="pending">Pending</option>
-                      <option value="processing">Processing</option>
-                      <option value="shipped">Shipped</option>
-                      <option value="delivered">Delivered</option>
-                      <option value="cancelled">Cancelled</option>
-                    </select>
-                  </div>
-                  <div className="transaction-details">
-                    <p><strong>User ID:</strong> {transaction.userId}</p>
-                    <p><strong>Date:</strong> {new Date(transaction.createdAt).toLocaleDateString()}</p>
-                    <p><strong>Total:</strong> ₱{transaction.totalAmount.toFixed(2)}</p>
-                    <p><strong>Items:</strong> {transaction.products.length}</p>
-                  </div>
-                  <div className="transaction-address">
-                    <strong>Shipping Address:</strong>
-                    <p>{transaction.shippingAddress.address}, {transaction.shippingAddress.city}</p>
-                    <p>{transaction.shippingAddress.zipCode}, {transaction.shippingAddress.country}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <Link to="/admin/users" className="action-item">
+              <div className="action-icon action-icon-purple">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+              </div>
+              <span className="action-label">View Users</span>
+            </Link>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

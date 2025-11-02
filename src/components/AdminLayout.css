@@ -1,0 +1,86 @@
+.admin-layout {
+  min-height: 100vh;
+  background-color: #fafafa;
+}
+
+/* Top Header */
+.admin-header {
+  background-color: white;
+  border-bottom: 1px solid #e5e5e5;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  height: 64px;
+}
+
+.admin-header-content {
+  padding: 0 1.5rem;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.admin-logo-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.admin-logo-link:hover .admin-logo-icon {
+  background: linear-gradient(to bottom right, #d97706, #b45309);
+}
+
+.admin-logo-icon {
+  background: linear-gradient(to bottom right, #d97706, #b45309);
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.admin-logo-icon svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: white;
+}
+
+.admin-logo-text {
+  font-size: 1.25rem;
+  letter-spacing: -0.025em;
+  color: #171717;
+}
+
+.admin-logo-accent {
+  color: #d97706;
+}
+
+.admin-badge {
+  margin-left: 0.5rem;
+  font-size: 0.75rem;
+  background-color: #fef3c7;
+  color: #92400e;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+}
+
+/* Container */
+.admin-container {
+  display: flex;
+  min-height: calc(100vh - 64px);
+}
+
+/* Main Content Area */
+.admin-main {
+  flex: 1;
+  background-color: #fafafa;
+}
+
+@media (max-width: 1024px) {
+  .admin-main {
+    margin-left: 0;
+  }
+}
