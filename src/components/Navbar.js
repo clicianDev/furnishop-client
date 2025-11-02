@@ -58,17 +58,13 @@ const Navbar = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/user-dashboard" className={isActive('/user-dashboard') ? 'active' : ''}>
+                <Link 
+                  to={isAdmin ? "/admin" : "/user-dashboard"} 
+                  className={isActive(isAdmin ? '/admin' : '/user-dashboard') || isActive('/admin-dashboard') ? 'active' : ''}
+                >
                   Dashboard
                 </Link>
               </li>
-              {isAdmin && (
-                <li>
-                  <Link to="/admin-dashboard" className={isActive('/admin-dashboard') ? 'active' : ''}>
-                    Admin
-                  </Link>
-                </li>
-              )}
               <li>
                 <button onClick={handleLogout} className="btn-logout">
                   Logout
@@ -132,21 +128,12 @@ const Navbar = () => {
                 Cart
               </Link>
               <Link 
-                to="/user-dashboard" 
-                className={isActive('/user-dashboard') ? 'active' : ''}
+                to={isAdmin ? "/admin" : "/user-dashboard"}
+                className={isActive(isAdmin ? '/admin' : '/user-dashboard') || isActive('/admin-dashboard') ? 'active' : ''}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Dashboard
               </Link>
-              {isAdmin && (
-                <Link 
-                  to="/admin-dashboard" 
-                  className={isActive('/admin-dashboard') ? 'active' : ''}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Admin
-                </Link>
-              )}
               <button onClick={handleLogout} className="mobile-btn-logout">
                 Logout
               </button>
