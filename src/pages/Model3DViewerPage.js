@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../config/axios';
 import Model3DViewer from '../components/Model3DViewer';
+import ARViewer from '../components/ARViewer';
 import './Model3DViewerPage.css';
 
 const TEXTURES = [
@@ -48,19 +49,19 @@ const Model3DViewerPage = () => {
   const [currentModelIndex, setCurrentModelIndex] = useState(0);
 
   useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const response = await api.get(`/api/products/${id}`);
+        setProduct(response.data);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching product:', error);
+        setLoading(false);
+      }
+    };
+    
     fetchProduct();
   }, [id]);
-
-  const fetchProduct = async () => {
-    try {
-      const response = await api.get(`/api/products/${id}`);
-      setProduct(response.data);
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching product:', error);
-      setLoading(false);
-    }
-  };
 
   const handleAddToCart = () => {
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
@@ -146,29 +147,59 @@ const Model3DViewerPage = () => {
       <div className="viewer-content">
         {/* 3D Model Display */}
         <div className="model-display">
-          {product.models && product.models.length > 0 ? (
-            <Model3DViewer 
-              models={product.models}
-              className="fullscreen-viewer"
-              onTextureChange={handleTextureChange}
-              selectedModelIndex={currentModelIndex}
-              onModelChange={setCurrentModelIndex}
-              selectedTexture={selectedTexture}
-            />
+          {viewMode === '3d' ? (
+            // 3D View Mode
+            product.models && product.models.length > 0 ? (
+              <Model3DViewer 
+                models={product.models}
+                className="fullscreen-viewer"
+                onTextureChange={handleTextureChange}
+                selectedModelIndex={currentModelIndex}
+                onModelChange={setCurrentModelIndex}
+                selectedTexture={selectedTexture}
+              />
+            ) : (
+              <div className="no-model-placeholder">
+                <div className="placeholder-icon">📦</div>
+                <h3>3D Model View</h3>
+                <p>Interactive 3D model of {product.name}</p>
+                <small>3D model coming soon</small>
+              </div>
+            )
           ) : (
-            <div className="no-model-placeholder">
-              <div className="placeholder-icon">📦</div>
-              <h3>3D Model View</h3>
-              <p>Interactive 3D model of {product.name}</p>
-              <small>3D model coming soon</small>
+            // AR View Mode
+            product.models && product.models.length > 0 ? (
+              <ARViewer 
+                models={product.models}
+                selectedTexture={selectedTexture}
+              />
+            ) : (
+              <div className="no-model-placeholder">
+                <div className="placeholder-icon">🎯</div>
+                <h3>AR View</h3>
+                <p>AR experience for {product.name}</p>
+                <small>3D model required for AR</small>
+              </div>
+            )
+          )}
+          
+          {/* Controls Info - Only show in 3D mode */}
+          {viewMode === '3d' && (
+            <div className="controls-info">
+              <span className="controls-icon">🔍</span>
+              Drag to rotate • Scroll to zoom
             </div>
           )}
           
-          {/* Controls Info */}
-          <div className="controls-info">
-            <span className="controls-icon">🔍</span>
-            Drag to rotate • Scroll to zoom
-          </div>
+          {/* AR Instructions - Only show in AR mode */}
+          {viewMode === 'ar' && product.models && product.models.length > 0 && (
+            <div className="ar-info-overlay">
+              <div className="ar-info-content">
+                <p>📱 Tap "Enter AR" to start the experience</p>
+                <small>Point your camera at a flat surface and tap to place furniture</small>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Side Info Panel (Desktop) */}

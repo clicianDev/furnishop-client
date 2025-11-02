@@ -1,0 +1,201 @@
+.ar-not-supported {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+}
+
+.ar-message {
+  text-align: center;
+  color: white;
+  max-width: 400px;
+  padding: 30px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+}
+
+.ar-icon {
+  font-size: 64px;
+  display: block;
+  margin-bottom: 20px;
+}
+
+.ar-message h3 {
+  font-size: 24px;
+  margin: 10px 0;
+  font-weight: 600;
+}
+
+.ar-message p {
+  font-size: 16px;
+  margin: 10px 0;
+  opacity: 0.9;
+}
+
+.ar-message small {
+  font-size: 13px;
+  opacity: 0.7;
+  display: block;
+  margin-top: 15px;
+  line-height: 1.5;
+}
+
+.ar-instructions {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  padding: 20px;
+  z-index: 100;
+  pointer-events: none;
+}
+
+.ar-instruction-content {
+  text-align: center;
+  color: white;
+  max-width: 400px;
+  padding: 30px;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.ar-instruction-content h3 {
+  font-size: 24px;
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.ar-instruction-content p {
+  font-size: 16px;
+  margin-bottom: 20px;
+  opacity: 0.9;
+}
+
+.ar-steps {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+  text-align: left;
+}
+
+.ar-steps li {
+  padding: 10px 15px;
+  margin: 8px 0;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  font-size: 14px;
+  border-left: 3px solid #4CAF50;
+}
+
+.ar-steps li:before {
+  content: "✓ ";
+  color: #4CAF50;
+  font-weight: bold;
+  margin-right: 8px;
+}
+
+/* AR Controls */
+.ar-controls-overlay {
+  position: absolute;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 15px;
+  z-index: 50;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 50px;
+  backdrop-filter: blur(10px);
+}
+
+.ar-control-btn {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid white;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.ar-control-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.ar-control-btn:active {
+  transform: scale(0.95);
+}
+
+.ar-control-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.ar-control-btn.primary {
+  background: #4CAF50;
+  border-color: #4CAF50;
+  width: 70px;
+  height: 70px;
+  font-size: 28px;
+}
+
+.ar-control-btn.primary:hover {
+  background: #45a049;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .ar-instruction-content {
+    padding: 20px;
+    max-width: 90%;
+  }
+
+  .ar-instruction-content h3 {
+    font-size: 20px;
+  }
+
+  .ar-instruction-content p {
+    font-size: 14px;
+  }
+
+  .ar-steps li {
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+
+  .ar-controls-overlay {
+    bottom: 80px;
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .ar-control-btn {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+  }
+
+  .ar-control-btn.primary {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+  }
+}
