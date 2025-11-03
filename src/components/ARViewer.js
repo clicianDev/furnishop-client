@@ -1,11 +1,44 @@
-import React, { Suspense, useRef, useState, useEffect } from 'react';
+import React, { Suspense, useRef, useState, useEffect, useMemo, useCallback } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei';
-import { XR, Interactive, useXRHitTest } from '@react-three/xr';
+import { XR, useXRHitTest, createXRStore, useXR } from '@react-three/xr';
 import * as THREE from 'three';
 import { EXRLoader } from 'three/examples/jsm/loaders/EXRLoader';
 import { useLoader } from '@react-three/fiber';
 import './ARViewer.css';
+
+const patchWebXRHitTestSource = () => {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  const XRSessionConstructor = window.XRSession;
+  if (!XRSessionConstructor) {
+    return;
+  }
+
+  const proto = XRSessionConstructor.prototype;
+  if (!proto || proto.__furnishopPatchedRequestHitTestSource) {
+    return;
+  }
+
+  const originalRequestHitTestSource = proto.requestHitTestSource;
+  if (typeof originalRequestHitTestSource !== 'function') {
+    return;
+  }
+
+  proto.requestHitTestSource = function patchedRequestHitTestSource(options) {
+    if (options && typeof options === 'object' && 'entityTypes' in options) {
+      const { entityTypes, ...rest } = options;
+      return originalRequestHitTestSource.call(this, rest);
+    }
+    return originalRequestHitTestSource.call(this, options);
+  };
+
+  proto.__furnishopPatchedRequestHitTestSource = true;
+};
+
+patchWebXRHitTestSource();
 
 function Model({ modelPath, selectedTexture, position, rotation, scale }) {
   const { scene } = useGLTF(modelPath);
@@ -56,33 +89,70 @@ function Model({ modelPath, selectedTexture, position, rotation, scale }) {
 function ARScene({ modelPath, selectedTexture }) {
   const reticleRef = useRef();
   const [models, setModels] = useState([]);
-  const [reticleVisible, setReticleVisible] = useState(true);
+  const [reticleVisible, setReticleVisible] = useState(false);
+  const hitMatrix = useMemo(() => new THREE.Matrix4(), []);
+  const reticlePosition = useMemo(() => new THREE.Vector3(), []);
+  const reticleQuaternion = useMemo(() => new THREE.Quaternion(), []);
+  const reticleScale = useMemo(() => new THREE.Vector3(), []);
+  const reticleEuler = useMemo(() => new THREE.Euler(), []);
+  const visibilityRef = useRef(false);
+  const session = useXR((state) => state.session);
 
   // Hit testing for surface detection
-  useXRHitTest((hitMatrix, hit) => {
-    if (reticleRef.current) {
-      hitMatrix.decompose(
-        reticleRef.current.position,
-        reticleRef.current.quaternion,
-        reticleRef.current.scale
-      );
-      reticleRef.current.rotation.set(-Math.PI / 2, 0, 0);
+  useXRHitTest((results, getWorldMatrix) => {
+    const reticle = reticleRef.current;
+    if (!reticle) {
+      return;
     }
-  });
 
-  const placeModel = (e) => {
-    if (reticleRef.current) {
-      const position = reticleRef.current.position.clone();
-      const rotation = [reticleRef.current.rotation.x, reticleRef.current.rotation.y, reticleRef.current.rotation.z];
-      
-      setModels([...models, {
-        id: Date.now(),
-        position: [position.x, position.y, position.z],
-        rotation: rotation,
-        scale: [0.5, 0.5, 0.5] // Adjusted scale for better AR experience
-      }]);
+    const hasHit = Array.isArray(results) && results.length > 0;
+
+    if (visibilityRef.current !== hasHit) {
+      visibilityRef.current = hasHit;
+      setReticleVisible(hasHit);
     }
-  };
+
+    if (!hasHit) {
+      return;
+    }
+
+    getWorldMatrix(hitMatrix, results[0]);
+    hitMatrix.decompose(reticlePosition, reticleQuaternion, reticleScale);
+
+    reticle.position.copy(reticlePosition);
+    reticle.quaternion.copy(reticleQuaternion);
+    reticle.scale.setScalar(1);
+  }, 'viewer');
+
+  const placeModel = useCallback(() => {
+    if (!visibilityRef.current) {
+      return;
+    }
+
+    const rotation = reticleEuler.setFromQuaternion(reticleQuaternion, 'YXZ');
+
+    setModels((prevModels) => ([
+      ...prevModels,
+      {
+        id: Date.now(),
+        position: [reticlePosition.x, reticlePosition.y, reticlePosition.z],
+        rotation: [rotation.x, rotation.y, rotation.z],
+        scale: [0.5, 0.5, 0.5],
+      },
+    ]));
+  }, [reticleEuler, reticlePosition, reticleQuaternion]);
+
+  useEffect(() => {
+    if (!session) {
+      return;
+    }
+
+    const handleSelect = () => placeModel();
+    session.addEventListener('select', handleSelect);
+
+    return () => session.removeEventListener('select', handleSelect);
+  }, [session, placeModel]);
+
 
   return (
     <>
@@ -93,14 +163,10 @@ function ARScene({ modelPath, selectedTexture }) {
       <hemisphereLight intensity={0.5} groundColor="#444" />
 
       {/* Reticle (placement indicator) */}
-      {reticleVisible && (
-        <Interactive onSelect={placeModel}>
-          <mesh ref={reticleRef} rotation-x={-Math.PI / 2}>
-            <ringGeometry args={[0.15, 0.2, 32]} />
-            <meshBasicMaterial color="#E17100" opacity={0.9} transparent side={THREE.DoubleSide} />
-          </mesh>
-        </Interactive>
-      )}
+      <mesh ref={reticleRef} visible={reticleVisible} onClick={placeModel} onPointerDown={placeModel}>
+        <ringGeometry args={[0.15, 0.2, 32]} />
+        <meshBasicMaterial color="#E17100" opacity={0.9} transparent depthWrite={false} side={THREE.DoubleSide} />
+      </mesh>
 
       {/* Placed models */}
       {models.map((model) => (
@@ -123,6 +189,16 @@ function ARViewer({ models, selectedTexture }) {
   const [isCheckingSupport, setIsCheckingSupport] = useState(true);
   const [arSessionActive, setArSessionActive] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [isStartingAR, setIsStartingAR] = useState(false);
+  const [startError, setStartError] = useState('');
+  const xrStore = useMemo(() => createXRStore({
+    hitTest: true,
+    domOverlay: true,
+    emulate: false,
+    offerSession: false,
+  }), []);
+
+  useEffect(() => () => xrStore.destroy(), [xrStore]);
 
   useEffect(() => {
     const checkARSupport = async () => {
@@ -156,6 +232,23 @@ function ARViewer({ models, selectedTexture }) {
 
   const modelsList = typeof models === 'string' ? [{ modelUrl: models, variantName: 'Default' }] : (models || []);
   const currentModel = modelsList[0];
+
+  const handleEnterAR = async () => {
+    if (isStartingAR) {
+      return;
+    }
+
+    try {
+      setStartError('');
+      setIsStartingAR(true);
+      await xrStore.enterAR();
+    } catch (error) {
+      console.error('Failed to start AR session:', error);
+      setStartError('Failed to start AR session. Please try again.');
+    } finally {
+      setIsStartingAR(false);
+    }
+  };
 
   // Show loading state while checking support
   if (isCheckingSupport) {
@@ -216,18 +309,13 @@ function ARViewer({ models, selectedTexture }) {
     <div className="ar-container">
       <Canvas
         className="ar-canvas"
-        gl={{ 
-          xr: { 
-            enabled: true,
-            referenceSpaceType: 'local-floor'
-          }
-        }}
+        camera={{ position: [0, 1.6, 3], fov: 50 }}
         onCreated={({ gl }) => {
-          // Enable XR on the renderer
           gl.xr.enabled = true;
         }}
       >
         <XR
+          store={xrStore}
           referenceSpace="local-floor"
           onSessionStart={() => {
             console.log('AR Session Started');
@@ -268,6 +356,15 @@ function ARViewer({ models, selectedTexture }) {
                 <span className="ar-step-text">Tap screen to place furniture</span>
               </div>
             </div>
+            <button
+              type="button"
+              className="ar-enter-button"
+              onClick={handleEnterAR}
+              disabled={isStartingAR}
+            >
+              {isStartingAR ? 'Starting AR...' : 'Enter AR'}
+            </button>
+            {startError && <p className="ar-error-text">{startError}</p>}
           </div>
         </div>
       )}

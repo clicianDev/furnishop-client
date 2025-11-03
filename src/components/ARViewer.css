@@ -130,7 +130,7 @@
   background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(8px);
   z-index: 10;
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 .ar-instructions-content {
@@ -143,6 +143,7 @@
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
   text-align: center;
   color: white;
+  pointer-events: auto;
 }
 
 .ar-icon-large {
@@ -207,6 +208,45 @@
   font-size: 0.9rem;
   opacity: 0.9;
   line-height: 1.4;
+}
+
+.ar-enter-button {
+  margin-top: 2rem;
+  padding: 0.9rem 2.5rem;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(135deg, #E17100 0%, #FF8C1A 100%);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+  box-shadow: 0 8px 25px rgba(225, 113, 0, 0.35);
+}
+
+.ar-enter-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(225, 113, 0, 0.45);
+}
+
+.ar-enter-button:active {
+  transform: translateY(0);
+  box-shadow: 0 8px 20px rgba(225, 113, 0, 0.3);
+}
+
+.ar-enter-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 6px 15px rgba(225, 113, 0, 0.2);
+}
+
+.ar-error-text {
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  color: #ff8686;
+  opacity: 0.9;
 }
 
 
