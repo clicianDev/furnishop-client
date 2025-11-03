@@ -53,10 +53,12 @@ function Model({ modelPath, selectedTexture, position, rotation, scale }) {
   );
 }
 
-function ARModel({ modelPath, selectedTexture }) {
+function ARScene({ modelPath, selectedTexture }) {
   const reticleRef = useRef();
   const [models, setModels] = useState([]);
+  const [reticleVisible, setReticleVisible] = useState(true);
 
+  // Hit testing for surface detection
   useXRHitTest((hitMatrix, hit) => {
     if (reticleRef.current) {
       hitMatrix.decompose(
@@ -77,7 +79,7 @@ function ARModel({ modelPath, selectedTexture }) {
         id: Date.now(),
         position: [position.x, position.y, position.z],
         rotation: rotation,
-        scale: [1, 1, 1]
+        scale: [0.5, 0.5, 0.5] // Adjusted scale for better AR experience
       }]);
     }
   };
@@ -85,17 +87,20 @@ function ARModel({ modelPath, selectedTexture }) {
   return (
     <>
       {/* AR Lighting */}
-      <ambientLight intensity={0.5} />
+      <ambientLight intensity={1} />
       <directionalLight position={[10, 10, 5]} intensity={1} castShadow />
-      <pointLight position={[-10, -10, -5]} intensity={0.3} />
+      <directionalLight position={[-10, -10, -5]} intensity={0.5} />
+      <hemisphereLight intensity={0.5} groundColor="#444" />
 
       {/* Reticle (placement indicator) */}
-      <Interactive onSelect={placeModel}>
-        <mesh ref={reticleRef} rotation-x={-Math.PI / 2}>
-          <ringGeometry args={[0.15, 0.2, 32]} />
-          <meshBasicMaterial color="#ffffff" opacity={0.8} transparent side={THREE.DoubleSide} />
-        </mesh>
-      </Interactive>
+      {reticleVisible && (
+        <Interactive onSelect={placeModel}>
+          <mesh ref={reticleRef} rotation-x={-Math.PI / 2}>
+            <ringGeometry args={[0.15, 0.2, 32]} />
+            <meshBasicMaterial color="#E17100" opacity={0.9} transparent side={THREE.DoubleSide} />
+          </mesh>
+        </Interactive>
+      )}
 
       {/* Placed models */}
       {models.map((model) => (
@@ -113,140 +118,159 @@ function ARModel({ modelPath, selectedTexture }) {
   );
 }
 
-function ARViewer({ models, selectedTexture, onARControlsReady }) {
-  const [isARSupported, setIsARSupported] = useState(true);
-  const [arStarted, setArStarted] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
+function ARViewer({ models, selectedTexture }) {
+  const [isARSupported, setIsARSupported] = useState(false);
+  const [isCheckingSupport, setIsCheckingSupport] = useState(true);
+  const [arSessionActive, setArSessionActive] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
-    // Detect iOS devices
-    const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    setIsIOS(iOS);
+    const checkARSupport = async () => {
+      try {
+        // Check if navigator.xr exists
+        if (!navigator.xr) {
+          setIsARSupported(false);
+          setErrorMessage('WebXR is not available on this browser');
+          setIsCheckingSupport(false);
+          return;
+        }
 
-    if (iOS) {
-      // iOS devices support AR through AR Quick Look
-      setIsARSupported(true);
-    } else if (navigator.xr) {
-      navigator.xr.isSessionSupported('immersive-ar').then((supported) => {
+        // Check for immersive-ar support
+        const supported = await navigator.xr.isSessionSupported('immersive-ar');
         setIsARSupported(supported);
-      });
-    } else {
-      setIsARSupported(false);
-    }
+        
+        if (!supported) {
+          setErrorMessage('AR mode is not supported on this device');
+        }
+      } catch (error) {
+        console.error('Error checking AR support:', error);
+        setIsARSupported(false);
+        setErrorMessage('Unable to check AR support');
+      } finally {
+        setIsCheckingSupport(false);
+      }
+    };
+
+    checkARSupport();
   }, []);
 
   const modelsList = typeof models === 'string' ? [{ modelUrl: models, variantName: 'Default' }] : (models || []);
-  const currentModel = modelsList[0]; // Use first model for AR
+  const currentModel = modelsList[0];
 
-  if (!isARSupported && !isIOS) {
+  // Show loading state while checking support
+  if (isCheckingSupport) {
     return (
-      <div className="ar-not-supported">
-        <div className="ar-message">
-          <span className="ar-icon">📱</span>
-          <h3>AR Not Available</h3>
-          <p>WebXR AR is not supported on this device.</p>
-          <small>AR requires a compatible mobile device with ARCore (Android) or ARKit (iOS)</small>
+      <div className="ar-container">
+        <div className="ar-message-wrapper">
+          <div className="ar-spinner"></div>
+          <p className="ar-message-text">Checking AR support...</p>
         </div>
       </div>
     );
   }
 
-  if (!currentModel) {
+  // Check if model exists
+  if (!currentModel || !currentModel.modelUrl) {
     return (
-      <div className="ar-not-supported">
-        <div className="ar-message">
+      <div className="ar-container">
+        <div className="ar-message-wrapper">
           <span className="ar-icon">📦</span>
-          <h3>No Model Available</h3>
-          <p>3D model is required for AR view</p>
+          <h3 className="ar-message-title">No Model Available</h3>
+          <p className="ar-message-text">3D model is required for AR experience</p>
         </div>
       </div>
     );
   }
 
-  // iOS AR Quick Look Support
-  if (isIOS) {
+  // AR not supported
+  if (!isARSupported) {
     return (
-      <div className="ar-ios-container">
-        <div className="ar-ios-content">
-          <div className="ar-ios-preview">
-            <span className="ar-icon" style={{ fontSize: '80px' }}>🪑</span>
-            <h3>iOS AR Support</h3>
-            <p>AR viewing on iOS is available</p>
-          </div>
-          
-          {/* Check if model is USDZ format for AR Quick Look */}
-          {currentModel.modelUrl && currentModel.modelUrl.endsWith('.usdz') ? (
-            <>
-              <a
-                href={currentModel.modelUrl}
-                rel="ar"
-                className="ar-quicklook-button"
-              >
-                <img
-                  src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEyIDJMMyA3djEwbDkgNSA5LTVWN3ptMCAxOGwtNy0zLjg5VjguMTFMMTIgNGw3IDQuMTF2Ny45OXoiIGZpbGw9IndoaXRlIi8+PC9zdmc+"
-                  alt="AR"
-                />
-                View in AR (AR Quick Look)
-              </a>
-              <small className="ar-ios-note">
-                Requires iOS 12+ with ARKit support
-              </small>
-            </>
-          ) : (
-            <>
-              <div className="ar-ios-info">
-                <p style={{ marginBottom: '15px' }}>
-                  For full AR experience on iOS, please use:
-                </p>
-                <ul style={{ textAlign: 'left', padding: '0 20px', fontSize: '14px', lineHeight: '1.8' }}>
-                  <li>Safari browser with WebXR Viewer extension</li>
-                  <li>Or convert model to USDZ format for AR Quick Look</li>
-                </ul>
-              </div>
-              <small className="ar-ios-note">
-                Currently viewing GLB model. Switch to 3D view for interactive preview.
-              </small>
-            </>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  // Android WebXR Support
-  return (
-    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-      {/* AR Instructions Overlay - Render before Canvas for proper z-index stacking */}
-      {/* {!arStarted && (
-        <div className="ar-instructions">
-          <div className="ar-instruction-content">
-            <h3>🎯 AR Mode Ready</h3>
-            <p>Tap the "Start AR" button below to begin</p>
-            <ul className="ar-steps">
-              <li>Point your camera at a flat surface</li>
-              <li>Wait for the placement indicator</li>
-              <li>Tap the screen to place the furniture</li>
-              <li>Rotate and scale with gestures</li>
+      <div className="ar-container">
+        <div className="ar-message-wrapper">
+          <span className="ar-icon">📱</span>
+          <h3 className="ar-message-title">AR Not Available</h3>
+          <p className="ar-message-text">{errorMessage}</p>
+          <div className="ar-requirements">
+            <p className="ar-requirements-title">Requirements:</p>
+            <ul className="ar-requirements-list">
+              <li>Android device with ARCore support</li>
+              <li>Chrome browser (version 79+)</li>
+              <li>Or iOS device with WebXR Viewer app</li>
             </ul>
           </div>
+          <a 
+            href="https://developers.google.com/ar/devices" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="ar-help-link"
+          >
+            Check device compatibility →
+          </a>
         </div>
-      )} */}
-      
-      <Canvas style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
+      </div>
+    );
+  }
+
+  // AR is supported - show AR viewer with Enter AR button
+  return (
+    <div className="ar-container">
+      <Canvas
+        className="ar-canvas"
+        gl={{ 
+          xr: { 
+            enabled: true,
+            referenceSpaceType: 'local-floor'
+          }
+        }}
+        onCreated={({ gl }) => {
+          // Enable XR on the renderer
+          gl.xr.enabled = true;
+        }}
+      >
         <XR
           referenceSpace="local-floor"
-          onSessionStart={() => setArStarted(true)}
-          onSessionEnd={() => setArStarted(false)}
+          onSessionStart={() => {
+            console.log('AR Session Started');
+            setArSessionActive(true);
+          }}
+          onSessionEnd={() => {
+            console.log('AR Session Ended');
+            setArSessionActive(false);
+          }}
         >
           <Suspense fallback={null}>
-            <ARModel 
+            <ARScene 
               modelPath={currentModel.modelUrl} 
               selectedTexture={selectedTexture}
             />
           </Suspense>
         </XR>
       </Canvas>
+
+      {/* AR Instructions Overlay - Show when not in AR session */}
+      {!arSessionActive && (
+        <div className="ar-instructions-overlay">
+          <div className="ar-instructions-content">
+            <span className="ar-icon-large">🎯</span>
+            <h3 className="ar-instructions-title">Ready for AR</h3>
+            <p className="ar-instructions-subtitle">Tap "Enter AR" below to start</p>
+            <div className="ar-steps">
+              <div className="ar-step">
+                <span className="ar-step-number">1</span>
+                <span className="ar-step-text">Point camera at flat surface</span>
+              </div>
+              <div className="ar-step">
+                <span className="ar-step-number">2</span>
+                <span className="ar-step-text">Wait for orange ring indicator</span>
+              </div>
+              <div className="ar-step">
+                <span className="ar-step-number">3</span>
+                <span className="ar-step-text">Tap screen to place furniture</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

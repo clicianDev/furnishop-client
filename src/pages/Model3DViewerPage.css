@@ -612,8 +612,8 @@
   
   .viewer-content {
     flex: 0 0 auto;
-    min-height: 400px;
-    height: 400px;
+    min-height: 50vh;
+    height: 50vh;
   }
   
   .model-display {
@@ -726,8 +726,8 @@
 
 @media (max-width: 480px) {
   .viewer-content {
-    height: 350px;
-    min-height: 350px;
+    height: 80vh;
+    min-height: 80vh;
   }
   
   .btn-back-header {

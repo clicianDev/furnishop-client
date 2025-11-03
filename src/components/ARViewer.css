@@ -1,316 +1,320 @@
-.ar-not-supported {
+/* AR Container */
+.ar-container {
   width: 100%;
   height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 20px;
+  position: relative;
+  background: linear-gradient(135deg, rgba(20, 20, 20, 0.95) 0%, rgba(30, 30, 30, 0.95) 100%);
 }
 
-.ar-message {
-  text-align: center;
+.ar-canvas {
+  width: 100%;
+  height: 100%;
+}
+
+/* AR Message Wrapper (for loading, errors, not supported) */
+.ar-message-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
   color: white;
-  max-width: 400px;
-  padding: 30px;
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 16px;
-  backdrop-filter: blur(10px);
+  text-align: center;
+  padding: 2rem;
 }
 
 .ar-icon {
-  font-size: 64px;
+  font-size: 4rem;
   display: block;
-  margin-bottom: 20px;
+  margin-bottom: 1rem;
+  opacity: 0.5;
 }
 
-.ar-message h3 {
-  font-size: 24px;
-  margin: 10px 0;
+.ar-message-title {
+  font-size: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: white;
   font-weight: 600;
 }
 
-.ar-message p {
-  font-size: 16px;
-  margin: 10px 0;
-  opacity: 0.9;
-}
-
-.ar-message small {
-  font-size: 13px;
-  opacity: 0.7;
-  display: block;
-  margin-top: 15px;
+.ar-message-text {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  opacity: 0.8;
   line-height: 1.5;
 }
 
-.ar-instructions {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 120px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(5px);
-  padding: 20px;
-  z-index: 1000;
-  pointer-events: none;
-}
-
-.ar-instruction-content {
-  text-align: center;
-  color: white;
+/* AR Requirements */
+.ar-requirements {
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: left;
   max-width: 400px;
-  padding: 30px;
-  background: rgba(0, 0, 0, 0.8);
-  border-radius: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.1);
 }
 
-.ar-instruction-content h3 {
-  font-size: 24px;
-  margin-bottom: 15px;
+.ar-requirements-title {
+  font-size: 0.9rem;
   font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: #E17100;
 }
 
-.ar-instruction-content p {
-  font-size: 16px;
-  margin-bottom: 20px;
-  opacity: 0.9;
-}
-
-.ar-steps {
+.ar-requirements-list {
   list-style: none;
   padding: 0;
-  margin: 20px 0;
-  text-align: left;
+  margin: 0;
 }
 
-.ar-steps li {
-  padding: 10px 15px;
-  margin: 8px 0;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  font-size: 14px;
-  border-left: 3px solid #4CAF50;
+.ar-requirements-list li {
+  padding: 0.5rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+  font-size: 0.85rem;
+  opacity: 0.8;
+  line-height: 1.5;
 }
 
-.ar-steps li:before {
-  content: "✓ ";
-  color: #4CAF50;
-  font-weight: bold;
-  margin-right: 8px;
-}
-
-/* AR Controls */
-.ar-controls-overlay {
+.ar-requirements-list li:before {
+  content: "✓";
   position: absolute;
-  bottom: 100px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 15px;
-  z-index: 50;
-  padding: 15px;
-  background: rgba(0, 0, 0, 0.7);
-  border-radius: 50px;
-  backdrop-filter: blur(10px);
+  left: 0;
+  color: #E17100;
+  font-weight: bold;
 }
 
-.ar-control-btn {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  border: 2px solid white;
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  font-size: 24px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.ar-help-link {
+  display: inline-block;
+  margin-top: 1rem;
+  color: #E17100;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
   transition: all 0.3s ease;
 }
 
-.ar-control-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: scale(1.1);
+.ar-help-link:hover {
+  color: #C55F00;
+  transform: translateX(5px);
 }
 
-.ar-control-btn:active {
-  transform: scale(0.95);
+/* AR Loading Spinner */
+.ar-spinner {
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top: 3px solid #E17100;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: arspin 1s linear infinite;
+  margin-bottom: 1rem;
 }
 
-.ar-control-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
+@keyframes arspin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-.ar-control-btn.primary {
-  background: #4CAF50;
-  border-color: #4CAF50;
-  width: 70px;
-  height: 70px;
-  font-size: 28px;
-}
 
-.ar-control-btn.primary:hover {
-  background: #45a049;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .ar-instruction-content {
-    padding: 20px;
-    max-width: 90%;
-  }
-
-  .ar-instruction-content h3 {
-    font-size: 20px;
-  }
-
-  .ar-instruction-content p {
-    font-size: 14px;
-  }
-
-  .ar-steps li {
-    font-size: 13px;
-    padding: 8px 12px;
-  }
-
-  .ar-controls-overlay {
-    bottom: 80px;
-    gap: 10px;
-    padding: 10px;
-  }
-
-  .ar-control-btn {
-    width: 50px;
-    height: 50px;
-    font-size: 20px;
-  }
-
-  .ar-control-btn.primary {
-    width: 60px;
-    height: 60px;
-    font-size: 24px;
-  }
-}
-
-/* iOS AR Quick Look Styles */
-.ar-ios-container {
+/* AR Instructions Overlay */
+.ar-instructions-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 20px;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  z-index: 10;
+  pointer-events: none;
 }
 
-.ar-ios-content {
+.ar-instructions-content {
+  background: rgba(0, 0, 0, 0.9);
+  border-radius: 20px;
+  padding: 2.5rem 2rem;
+  max-width: 400px;
+  width: 90%;
+  border: 2px solid rgba(225, 113, 0, 0.5);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
   text-align: center;
   color: white;
-  max-width: 400px;
-  padding: 40px 30px;
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 20px;
-  backdrop-filter: blur(10px);
-  border: 2px solid rgba(255, 255, 255, 0.1);
 }
 
-.ar-ios-preview {
-  margin-bottom: 30px;
+.ar-icon-large {
+  font-size: 4rem;
+  display: block;
+  margin-bottom: 1rem;
+  animation: arpulse 2s ease-in-out infinite;
 }
 
-.ar-ios-preview h3 {
-  font-size: 28px;
-  margin: 20px 0 10px 0;
-  font-weight: 600;
+@keyframes arpulse {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.1); opacity: 1; }
 }
 
-.ar-ios-preview p {
-  font-size: 16px;
+.ar-instructions-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #E17100;
+}
+
+.ar-instructions-subtitle {
+  font-size: 1rem;
   opacity: 0.9;
-  margin-bottom: 0;
+  margin-bottom: 2rem;
 }
 
-.ar-quicklook-button {
-  display: inline-flex;
+/* AR Steps */
+.ar-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.ar-step {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-align: left;
+  padding: 0.75rem;
+  background: rgba(225, 113, 0, 0.1);
+  border-radius: 10px;
+  border: 1px solid rgba(225, 113, 0, 0.2);
+}
+
+.ar-step-number {
+  background: #E17100;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  padding: 16px 32px;
-  background: white;
-  color: #333;
-  text-decoration: none;
-  border-radius: 50px;
-  font-size: 18px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  margin: 20px 0;
+  font-weight: 700;
+  font-size: 1rem;
+  flex-shrink: 0;
 }
 
-.ar-quicklook-button:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 30px rgba(0, 0, 0, 0.3);
+.ar-step-text {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  line-height: 1.4;
 }
 
-.ar-quicklook-button:active {
-  transform: scale(0.98);
-}
 
-.ar-quicklook-button img {
-  width: 24px;
-  height: 24px;
-}
 
-.ar-ios-note {
-  display: block;
-  margin-top: 20px;
-  font-size: 13px;
-  opacity: 0.7;
-  line-height: 1.5;
-}
-
-.ar-ios-info {
-  margin: 20px 0;
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.ar-ios-info p {
-  margin: 0;
-  font-size: 15px;
-  font-weight: 500;
-}
-
-.ar-ios-info ul {
-  margin: 10px 0;
-}
-
-.ar-ios-info ul li {
-  margin: 8px 0;
-}
-
+/* Mobile Responsive */
 @media (max-width: 768px) {
-  .ar-ios-content {
-    padding: 30px 20px;
+  .ar-message-wrapper {
+    padding: 1.5rem;
+  }
+
+  .ar-icon {
+    font-size: 3rem;
+  }
+
+  .ar-message-title {
+    font-size: 1.25rem;
+  }
+
+  .ar-message-text {
+    font-size: 0.9rem;
+  }
+
+  .ar-requirements {
+    padding: 1.25rem;
+    margin-top: 1rem;
+  }
+
+  .ar-requirements-list li {
+    font-size: 0.8rem;
+  }
+
+  .ar-instructions-content {
+    padding: 2rem 1.5rem;
     max-width: 90%;
   }
 
-  .ar-ios-preview h3 {
-    font-size: 24px;
+  .ar-icon-large {
+    font-size: 3rem;
   }
 
-  .ar-quicklook-button {
-    font-size: 16px;
-    padding: 14px 28px;
+  .ar-instructions-title {
+    font-size: 1.5rem;
+  }
+
+  .ar-instructions-subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .ar-step {
+    padding: 0.6rem;
+    gap: 0.75rem;
+  }
+
+  .ar-step-number {
+    width: 28px;
+    height: 28px;
+    font-size: 0.9rem;
+  }
+
+  .ar-step-text {
+    font-size: 0.85rem;
   }
 }
+
+@media (max-width: 480px) {
+  .ar-requirements {
+    padding: 1rem;
+  }
+
+  .ar-requirements-list li {
+    font-size: 0.75rem;
+    padding: 0.4rem 0;
+    padding-left: 1.25rem;
+  }
+
+  .ar-instructions-content {
+    padding: 1.5rem 1rem;
+  }
+
+  .ar-icon-large {
+    font-size: 2.5rem;
+  }
+
+  .ar-instructions-title {
+    font-size: 1.25rem;
+  }
+
+  .ar-instructions-subtitle {
+    font-size: 0.85rem;
+  }
+
+  .ar-steps {
+    gap: 0.75rem;
+  }
+
+  .ar-step {
+    padding: 0.5rem;
+  }
+
+  .ar-step-number {
+    width: 26px;
+    height: 26px;
+    font-size: 0.85rem;
+  }
+
+  .ar-step-text {
+    font-size: 0.8rem;
+  }
+}
+
