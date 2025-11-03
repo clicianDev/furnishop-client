@@ -1,10 +1,8 @@
 import React, { Suspense, useRef, useState, useEffect, useMemo, useCallback } from 'react';
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei';
-import { XR, useXRHitTest, createXRStore, useXR } from '@react-three/xr';
 import * as THREE from 'three';
 import { EXRLoader } from 'three/examples/jsm/loaders/EXRLoader';
-import { useLoader } from '@react-three/fiber';
 import './ARViewer.css';
 
 const patchWebXRHitTestSource = () => {
@@ -86,63 +84,156 @@ function Model({ modelPath, selectedTexture, position, rotation, scale }) {
   );
 }
 
-function ARScene({ modelPath, selectedTexture }) {
+function ARScene({ modelPath, selectedTexture, isSessionActive }) {
   const reticleRef = useRef();
+  const { gl } = useThree();
   const [models, setModels] = useState([]);
   const [reticleVisible, setReticleVisible] = useState(false);
-  const hitMatrix = useMemo(() => new THREE.Matrix4(), []);
-  const reticlePosition = useMemo(() => new THREE.Vector3(), []);
-  const reticleQuaternion = useMemo(() => new THREE.Quaternion(), []);
-  const reticleScale = useMemo(() => new THREE.Vector3(), []);
-  const reticleEuler = useMemo(() => new THREE.Euler(), []);
+  const hitTestSourceRef = useRef(null);
   const visibilityRef = useRef(false);
-  const session = useXR((state) => state.session);
+  const placementPositionRef = useRef(new THREE.Vector3());
+  const placementEulerRef = useRef(new THREE.Euler());
+  const tempQuaternion = useMemo(() => new THREE.Quaternion(), []);
+  const tempEuler = useMemo(() => new THREE.Euler(), []);
 
-  // Hit testing for surface detection
-  useXRHitTest((results, getWorldMatrix) => {
+  useEffect(() => {
+    if (!isSessionActive) {
+      hitTestSourceRef.current?.cancel?.();
+      hitTestSourceRef.current = null;
+      visibilityRef.current = false;
+      setReticleVisible(false);
+      return;
+    }
+
+    const session = gl.xr.getSession();
+    if (!session) {
+      return;
+    }
+
+    let cancelled = false;
+
+    session
+      .requestReferenceSpace('viewer')
+      .then((viewerSpace) => {
+        if (cancelled || !viewerSpace) {
+          return undefined;
+        }
+        return session.requestHitTestSource({ space: viewerSpace });
+      })
+      .then((hitTestSource) => {
+        if (cancelled || !hitTestSource) {
+          hitTestSource?.cancel?.();
+          return;
+        }
+        hitTestSourceRef.current = hitTestSource;
+      })
+      .catch((error) => {
+        console.error('Failed to initialize AR hit testing:', error);
+      });
+
+    const handleSessionEnd = () => {
+      hitTestSourceRef.current?.cancel?.();
+      hitTestSourceRef.current = null;
+      visibilityRef.current = false;
+      setReticleVisible(false);
+    };
+
+    session.addEventListener('end', handleSessionEnd);
+
+    return () => {
+      cancelled = true;
+      session.removeEventListener('end', handleSessionEnd);
+      hitTestSourceRef.current?.cancel?.();
+      hitTestSourceRef.current = null;
+    };
+  }, [gl, isSessionActive]);
+
+  useFrame((state, _delta, frame) => {
     const reticle = reticleRef.current;
     if (!reticle) {
       return;
     }
 
-    const hasHit = Array.isArray(results) && results.length > 0;
-
-    if (visibilityRef.current !== hasHit) {
-      visibilityRef.current = hasHit;
-      setReticleVisible(hasHit);
-    }
-
-    if (!hasHit) {
+    if (!isSessionActive || !frame) {
+      if (visibilityRef.current) {
+        visibilityRef.current = false;
+        setReticleVisible(false);
+      }
       return;
     }
 
-    getWorldMatrix(hitMatrix, results[0]);
-    hitMatrix.decompose(reticlePosition, reticleQuaternion, reticleScale);
+    const hitTestSource = hitTestSourceRef.current;
+    const referenceSpace = state.gl.xr.getReferenceSpace();
 
-    reticle.position.copy(reticlePosition);
-    reticle.quaternion.copy(reticleQuaternion);
-    reticle.scale.setScalar(1);
-  }, 'viewer');
+    if (!hitTestSource || !referenceSpace) {
+      if (visibilityRef.current) {
+        visibilityRef.current = false;
+        setReticleVisible(false);
+      }
+      return;
+    }
+
+    const hits = frame.getHitTestResults(hitTestSource);
+    if (!hits || hits.length === 0) {
+      if (visibilityRef.current) {
+        visibilityRef.current = false;
+        setReticleVisible(false);
+      }
+      return;
+    }
+
+    const hit = hits[0];
+    const pose = hit.getPose(referenceSpace);
+    if (!pose) {
+      if (visibilityRef.current) {
+        visibilityRef.current = false;
+        setReticleVisible(false);
+      }
+      return;
+    }
+
+    const { position, orientation } = pose.transform;
+
+    reticle.position.set(position.x, position.y, position.z);
+    tempQuaternion.set(orientation.x, orientation.y, orientation.z, orientation.w);
+    tempEuler.setFromQuaternion(tempQuaternion, 'YXZ');
+
+    placementEulerRef.current.set(0, tempEuler.y, 0);
+    reticle.rotation.set(-Math.PI / 2, tempEuler.y, 0);
+
+    placementPositionRef.current.set(position.x, position.y, position.z);
+
+    if (!visibilityRef.current) {
+      visibilityRef.current = true;
+      setReticleVisible(true);
+    }
+  });
 
   const placeModel = useCallback(() => {
-    if (!visibilityRef.current) {
+    if (!isSessionActive || !visibilityRef.current) {
       return;
     }
 
-    const rotation = reticleEuler.setFromQuaternion(reticleQuaternion, 'YXZ');
+    const position = placementPositionRef.current;
+    const rotation = placementEulerRef.current;
 
     setModels((prevModels) => ([
       ...prevModels,
       {
         id: Date.now(),
-        position: [reticlePosition.x, reticlePosition.y, reticlePosition.z],
+        position: [position.x, position.y, position.z],
         rotation: [rotation.x, rotation.y, rotation.z],
         scale: [0.5, 0.5, 0.5],
       },
     ]));
-  }, [reticleEuler, reticlePosition, reticleQuaternion]);
+  }, [isSessionActive]);
 
   useEffect(() => {
+    if (!isSessionActive) {
+      return;
+    }
+
+    const session = gl.xr.getSession();
     if (!session) {
       return;
     }
@@ -151,8 +242,7 @@ function ARScene({ modelPath, selectedTexture }) {
     session.addEventListener('select', handleSelect);
 
     return () => session.removeEventListener('select', handleSelect);
-  }, [session, placeModel]);
-
+  }, [gl, isSessionActive, placeModel]);
 
   return (
     <>
@@ -191,30 +281,30 @@ function ARViewer({ models, selectedTexture }) {
   const [errorMessage, setErrorMessage] = useState('');
   const [isStartingAR, setIsStartingAR] = useState(false);
   const [startError, setStartError] = useState('');
-  const xrStore = useMemo(() => createXRStore({
-    hitTest: true,
-    domOverlay: true,
-    emulate: false,
-    offerSession: false,
-  }), []);
+  const rendererRef = useRef(null);
+  const sessionRef = useRef(null);
 
-  useEffect(() => () => xrStore.destroy(), [xrStore]);
+  useEffect(() => {
+    return () => {
+      const session = sessionRef.current;
+      if (session) {
+        session.end().catch(() => undefined);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const checkARSupport = async () => {
       try {
-        // Check if navigator.xr exists
         if (!navigator.xr) {
           setIsARSupported(false);
           setErrorMessage('WebXR is not available on this browser');
-          setIsCheckingSupport(false);
           return;
         }
 
-        // Check for immersive-ar support
         const supported = await navigator.xr.isSessionSupported('immersive-ar');
         setIsARSupported(supported);
-        
+
         if (!supported) {
           setErrorMessage('AR mode is not supported on this device');
         }
@@ -238,19 +328,52 @@ function ARViewer({ models, selectedTexture }) {
       return;
     }
 
+    if (!rendererRef.current) {
+      setStartError('Renderer is not ready yet. Please try again.');
+      return;
+    }
+
+    if (!navigator.xr) {
+      setStartError('WebXR is not available on this browser.');
+      return;
+    }
+
     try {
       setStartError('');
       setIsStartingAR(true);
-      await xrStore.enterAR();
+
+      const existingSession = rendererRef.current.xr.getSession();
+      if (existingSession) {
+        setArSessionActive(true);
+        return;
+      }
+
+      const sessionInit = {
+        requiredFeatures: ['hit-test', 'local-floor'],
+      };
+
+      const session = await navigator.xr.requestSession('immersive-ar', sessionInit);
+
+      const handleSessionEnd = () => {
+        session.removeEventListener('end', handleSessionEnd);
+        sessionRef.current = null;
+        setArSessionActive(false);
+      };
+      session.addEventListener('end', handleSessionEnd);
+
+      rendererRef.current.xr.setReferenceSpaceType('local-floor');
+      await rendererRef.current.xr.setSession(session);
+
+      sessionRef.current = session;
+      setArSessionActive(true);
     } catch (error) {
       console.error('Failed to start AR session:', error);
-      setStartError('Failed to start AR session. Please try again.');
+      setStartError(error?.message || 'Failed to start AR session. Please try again.');
     } finally {
       setIsStartingAR(false);
     }
   };
 
-  // Show loading state while checking support
   if (isCheckingSupport) {
     return (
       <div className="ar-container">
@@ -262,7 +385,6 @@ function ARViewer({ models, selectedTexture }) {
     );
   }
 
-  // Check if model exists
   if (!currentModel || !currentModel.modelUrl) {
     return (
       <div className="ar-container">
@@ -275,7 +397,6 @@ function ARViewer({ models, selectedTexture }) {
     );
   }
 
-  // AR not supported
   if (!isARSupported) {
     return (
       <div className="ar-container">
@@ -291,9 +412,9 @@ function ARViewer({ models, selectedTexture }) {
               <li>Or iOS device with WebXR Viewer app</li>
             </ul>
           </div>
-          <a 
-            href="https://developers.google.com/ar/devices" 
-            target="_blank" 
+          <a
+            href="https://developers.google.com/ar/devices"
+            target="_blank"
             rel="noopener noreferrer"
             className="ar-help-link"
           >
@@ -304,7 +425,6 @@ function ARViewer({ models, selectedTexture }) {
     );
   }
 
-  // AR is supported - show AR viewer with Enter AR button
   return (
     <div className="ar-container">
       <Canvas
@@ -312,30 +432,19 @@ function ARViewer({ models, selectedTexture }) {
         camera={{ position: [0, 1.6, 3], fov: 50 }}
         onCreated={({ gl }) => {
           gl.xr.enabled = true;
+          gl.xr.setReferenceSpaceType('local-floor');
+          rendererRef.current = gl;
         }}
       >
-        <XR
-          store={xrStore}
-          referenceSpace="local-floor"
-          onSessionStart={() => {
-            console.log('AR Session Started');
-            setArSessionActive(true);
-          }}
-          onSessionEnd={() => {
-            console.log('AR Session Ended');
-            setArSessionActive(false);
-          }}
-        >
-          <Suspense fallback={null}>
-            <ARScene 
-              modelPath={currentModel.modelUrl} 
-              selectedTexture={selectedTexture}
-            />
-          </Suspense>
-        </XR>
+        <Suspense fallback={null}>
+          <ARScene
+            modelPath={currentModel.modelUrl}
+            selectedTexture={selectedTexture}
+            isSessionActive={arSessionActive}
+          />
+        </Suspense>
       </Canvas>
 
-      {/* AR Instructions Overlay - Show when not in AR session */}
       {!arSessionActive && (
         <div className="ar-instructions-overlay">
           <div className="ar-instructions-content">
