@@ -25,12 +25,14 @@ const CheckoutPage = () => {
     );
     setCart(updatedCart);
     localStorage.setItem('cart', JSON.stringify(updatedCart));
+    window.dispatchEvent(new Event('cartUpdated'));
   };
 
   const removeItem = (productId) => {
     const updatedCart = cart.filter(item => item.productId !== productId);
     setCart(updatedCart);
     localStorage.setItem('cart', JSON.stringify(updatedCart));
+    window.dispatchEvent(new Event('cartUpdated'));
   };
 
   const calculateTotal = () => {

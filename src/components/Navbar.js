@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import './Navbar.css';
 
@@ -6,7 +6,29 @@ const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
   const [isAdmin, setIsAdmin] = useState(localStorage.getItem('userRole') === 'admin');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [cartItemCount, setCartItemCount] = useState(0);
   const location = useLocation();
+
+  // Calculate cart item count
+  useEffect(() => {
+    const updateCartCount = () => {
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const totalItems = cart.reduce((total, item) => total + (item.quantity || 1), 0);
+      setCartItemCount(totalItems);
+    };
+
+    // Update cart count on mount and when location changes
+    updateCartCount();
+
+    // Listen for cart updates
+    window.addEventListener('storage', updateCartCount);
+    window.addEventListener('cartUpdated', updateCartCount);
+
+    return () => {
+      window.removeEventListener('storage', updateCartCount);
+      window.removeEventListener('cartUpdated', updateCartCount);
+    };
+  }, [location]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -53,16 +75,23 @@ const Navbar = () => {
           {isLoggedIn ? (
             <>
               <li>
-                <Link to="/checkout" className={isActive('/checkout') ? 'active' : ''}>
-                  Cart
-                </Link>
-              </li>
-              <li>
                 <Link 
                   to={isAdmin ? "/admin" : "/user-dashboard"} 
                   className={isActive(isAdmin ? '/admin' : '/user-dashboard') || isActive('/admin-dashboard') ? 'active' : ''}
                 >
                   Dashboard
+                </Link>
+              </li>
+              <li>
+                <Link to="/checkout" className={`cart-icon-link ${isActive('/checkout') ? 'active' : ''}`}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="9" cy="21" r="1"></circle>
+                    <circle cx="20" cy="21" r="1"></circle>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                  </svg>
+                  {cartItemCount > 0 && (
+                    <span className="cart-badge">{cartItemCount}</span>
+                  )}
                 </Link>
               </li>
               <li>
@@ -121,18 +150,26 @@ const Navbar = () => {
           {isLoggedIn ? (
             <>
               <Link 
-                to="/checkout" 
-                className={isActive('/checkout') ? 'active' : ''}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Cart
-              </Link>
-              <Link 
                 to={isAdmin ? "/admin" : "/user-dashboard"}
                 className={isActive(isAdmin ? '/admin' : '/user-dashboard') || isActive('/admin-dashboard') ? 'active' : ''}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Dashboard
+              </Link>
+              <Link 
+                to="/checkout" 
+                className={`mobile-cart-link ${isActive('/checkout') ? 'active' : ''}`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="9" cy="21" r="1"></circle>
+                  <circle cx="20" cy="21" r="1"></circle>
+                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                </svg>
+                <span>Cart</span>
+                {cartItemCount > 0 && (
+                  <span className="mobile-cart-badge">{cartItemCount}</span>
+                )}
               </Link>
               <button onClick={handleLogout} className="mobile-btn-logout">
                 Logout
