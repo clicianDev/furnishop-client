@@ -479,3 +479,65 @@
   }
 }
 
+/* Login Prompt Card */
+.login-prompt-card {
+  text-align: center;
+  padding: 40px 30px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border: 2px solid #e5e5e5;
+}
+
+.login-prompt-card h2 {
+  font-size: 1.8rem;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.login-prompt-text {
+  font-size: 1.1rem;
+  color: #666;
+  margin-bottom: 30px;
+  line-height: 1.6;
+}
+
+.login-prompt-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.login-prompt-buttons .btn {
+  min-width: 150px;
+}
+
+.login-prompt-note {
+  font-size: 0.95rem;
+  color: #28a745;
+  margin-top: 20px;
+  padding: 12px;
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .login-prompt-card {
+    padding: 30px 20px;
+  }
+
+  .login-prompt-card h2 {
+    font-size: 1.5rem;
+  }
+
+  .login-prompt-buttons {
+    flex-direction: column;
+  }
+
+  .login-prompt-buttons .btn {
+    width: 100%;
+  }
+}
+

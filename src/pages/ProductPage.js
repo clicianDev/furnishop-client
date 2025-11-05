@@ -226,7 +226,7 @@ const ProductPage = () => {
             </div>
 
             {/* Quantity & Add to Cart */}
-            {product.stock > 0 && (
+            {(product.stock === undefined || product.stock > 0) && (
               <div className="purchase-actions">
                 <div className="quantity-selector">
                   <button 
@@ -237,7 +237,7 @@ const ProductPage = () => {
                   </button>
                   <span className="qty-value">{quantity}</span>
                   <button 
-                    onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+                    onClick={() => setQuantity(Math.min(product.stock || 999, quantity + 1))}
                     className="qty-btn"
                   >
                     +

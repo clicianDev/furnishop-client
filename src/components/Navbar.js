@@ -77,6 +77,19 @@ const Navbar = () => {
               Custom
             </Link>
           </li>
+          {/* Cart Icon - Always visible for all users */}
+          <li>
+            <Link to="/checkout" className={`cart-icon-link ${isActive('/checkout') ? 'active' : ''}`}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="9" cy="21" r="1"></circle>
+                <circle cx="20" cy="21" r="1"></circle>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+              </svg>
+              {cartItemCount > 0 && (
+                <span className="cart-badge">{cartItemCount}</span>
+              )}
+            </Link>
+          </li>
           {isLoggedIn ? (
             <>
               <li>
@@ -85,18 +98,6 @@ const Navbar = () => {
                   className={isActive(isAdmin ? '/admin' : '/user-dashboard') || isActive('/admin-dashboard') ? 'active' : ''}
                 >
                   Dashboard
-                </Link>
-              </li>
-              <li>
-                <Link to="/checkout" className={`cart-icon-link ${isActive('/checkout') ? 'active' : ''}`}>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="9" cy="21" r="1"></circle>
-                    <circle cx="20" cy="21" r="1"></circle>
-                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                  </svg>
-                  {cartItemCount > 0 && (
-                    <span className="cart-badge">{cartItemCount}</span>
-                  )}
                 </Link>
               </li>
               <li>
@@ -159,6 +160,22 @@ const Navbar = () => {
           >
             Custom
           </Link>
+          {/* Cart Link - Always visible for all users */}
+          <Link 
+            to="/checkout" 
+            className={`mobile-cart-link ${isActive('/checkout') ? 'active' : ''}`}
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="9" cy="21" r="1"></circle>
+              <circle cx="20" cy="21" r="1"></circle>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+            <span>Cart</span>
+            {cartItemCount > 0 && (
+              <span className="mobile-cart-badge">{cartItemCount}</span>
+            )}
+          </Link>
           {isLoggedIn ? (
             <>
               <Link 
@@ -167,21 +184,6 @@ const Navbar = () => {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Dashboard
-              </Link>
-              <Link 
-                to="/checkout" 
-                className={`mobile-cart-link ${isActive('/checkout') ? 'active' : ''}`}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="9" cy="21" r="1"></circle>
-                  <circle cx="20" cy="21" r="1"></circle>
-                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                </svg>
-                <span>Cart</span>
-                {cartItemCount > 0 && (
-                  <span className="mobile-cart-badge">{cartItemCount}</span>
-                )}
               </Link>
               <button onClick={handleLogout} className="mobile-btn-logout">
                 Logout

@@ -15,6 +15,7 @@ const LoginPage = () => {
   });
   const [error, setError] = useState('');
   const [toast, setToast] = useState(null);
+  const isCheckoutRedirect = localStorage.getItem('checkout-redirect') === 'true';
 
   const showToast = (message, type) => {
     setToast({ message, type });
@@ -54,7 +55,13 @@ const LoginPage = () => {
       );
       
       setTimeout(() => {
-        if (response.data.user.role === 'admin') {
+        // Check if user was trying to checkout
+        const checkoutRedirect = localStorage.getItem('checkout-redirect');
+        
+        if (checkoutRedirect === 'true') {
+          localStorage.removeItem('checkout-redirect');
+          navigate('/checkout');
+        } else if (response.data.user.role === 'admin') {
           navigate('/admin-dashboard');
         } else {
           navigate('/user-dashboard');
@@ -80,6 +87,12 @@ const LoginPage = () => {
       )}
       
       <div className="login-container card">
+        {isCheckoutRedirect && (
+          <div className="checkout-notice">
+            🛒 Your cart items are saved! Please login or create an account to complete your purchase.
+          </div>
+        )}
+        
         <h1>{isLogin ? 'Login' : 'Register'}</h1>
         
         {error && <div className="error-message">{error}</div>}

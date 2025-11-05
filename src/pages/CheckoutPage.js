@@ -8,6 +8,7 @@ const CheckoutPage = () => {
   const [cart, setCart] = useState([]);
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('cod'); // Default to Cash on Delivery
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
   const [shippingInfo, setShippingInfo] = useState({
     address: '',
     city: '',
@@ -27,6 +28,10 @@ const CheckoutPage = () => {
     const savedCart = JSON.parse(localStorage.getItem('cart') || '[]');
     setCart(savedCart);
     fetchPaymentMethods();
+    
+    // Check login status
+    const token = localStorage.getItem('token');
+    setIsLoggedIn(!!token);
   }, []);
 
   const fetchPaymentMethods = async () => {
@@ -150,8 +155,7 @@ const CheckoutPage = () => {
   const handleCheckout = async () => {
     const token = localStorage.getItem('token');
     if (!token) {
-      alert('Please login to complete your purchase');
-      navigate('/login');
+      // Don't navigate away, show login prompt in the checkout page
       return;
     }
 
@@ -255,6 +259,43 @@ const CheckoutPage = () => {
 
         {cart.length > 0 && (
           <div className="checkout-section">
+            {/* Login/Register Prompt - Show only if not logged in */}
+            {!isLoggedIn && (
+              <div className="card login-prompt-card">
+                <h2>🔐 Login or Create Account</h2>
+                <p className="login-prompt-text">
+                  Please login or create an account to complete your purchase
+                </p>
+                <div className="login-prompt-buttons">
+                  <button 
+                    onClick={() => {
+                      // Save current cart before navigating
+                      localStorage.setItem('checkout-redirect', 'true');
+                      navigate('/login');
+                    }} 
+                    className="btn btn-primary btn-large"
+                  >
+                    Login
+                  </button>
+                  <button 
+                    onClick={() => {
+                      // Save current cart before navigating
+                      localStorage.setItem('checkout-redirect', 'true');
+                      navigate('/login');
+                    }} 
+                    className="btn btn-secondary btn-large"
+                  >
+                    Create Account
+                  </button>
+                </div>
+                <p className="login-prompt-note">
+                  ✓ Your cart items are saved and will be here when you return
+                </p>
+              </div>
+            )}
+
+            {/* Checkout Form - Show only if logged in */}
+            {isLoggedIn && (
             <div className="card">
               <h2>Shipping Information</h2>
               <div className="form-group">
@@ -487,6 +528,7 @@ const CheckoutPage = () => {
                 Place Order
               </button>
             </div>
+            )}
           </div>
         )}
       </div>
