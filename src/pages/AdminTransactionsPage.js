@@ -185,7 +185,13 @@ const AdminTransactionsPage = () => {
                     </div>
                     {transaction.paymentMethod?.provider && (
                       <div className="payment-info">
-                        <p className="payment-info-label">Payment Details:</p>
+                        <p className="payment-info-label">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{marginRight: '8px', verticalAlign: 'middle'}}>
+                            <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                            <line x1="2" y1="10" x2="22" y2="10"></line>
+                          </svg>
+                          Payment Confirmation Details
+                        </p>
                         {transaction.paymentMethod.screenshot ? (
                           <div className="payment-screenshot-section">
                             <p className="screenshot-label">Transaction Screenshot:</p>
@@ -197,23 +203,26 @@ const AdminTransactionsPage = () => {
                                 onClick={() => window.open(transaction.paymentMethod.screenshot, '_blank')}
                               />
                             </div>
-                            <small className="screenshot-hint">Click to view full size</small>
+                            <small className="screenshot-hint">Click image to view full size</small>
                           </div>
                         ) : (
-                          <div className="payment-info-grid">
-                            <div className="payment-detail">
-                              <span className="payment-detail-label">Reference Number:</span>
-                              <span className="payment-detail-value">{transaction.paymentMethod.referenceNumber}</span>
+                          <>
+                            <p className="payment-method-type">Manual Entry Details:</p>
+                            <div className="payment-info-grid">
+                              <div className="payment-detail">
+                                <span className="payment-detail-label">Reference Number:</span>
+                                <span className="payment-detail-value">{transaction.paymentMethod.referenceNumber || 'N/A'}</span>
+                              </div>
+                              <div className="payment-detail">
+                                <span className="payment-detail-label">Sender Number:</span>
+                                <span className="payment-detail-value">{transaction.paymentMethod.senderNumber || 'N/A'}</span>
+                              </div>
+                              <div className="payment-detail">
+                                <span className="payment-detail-label">Sender Name:</span>
+                                <span className="payment-detail-value">{transaction.paymentMethod.senderName || 'N/A'}</span>
+                              </div>
                             </div>
-                            <div className="payment-detail">
-                              <span className="payment-detail-label">Sender Number:</span>
-                              <span className="payment-detail-value">{transaction.paymentMethod.senderNumber}</span>
-                            </div>
-                            <div className="payment-detail">
-                              <span className="payment-detail-label">Sender Name:</span>
-                              <span className="payment-detail-value">{transaction.paymentMethod.senderName}</span>
-                            </div>
-                          </div>
+                          </>
                         )}
                       </div>
                     )}

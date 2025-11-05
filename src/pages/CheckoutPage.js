@@ -133,7 +133,7 @@ const CheckoutPage = () => {
       const formData = new FormData();
       formData.append('images', transactionScreenshot);
 
-      const response = await api.post('/api/custom-orders/upload-images', formData, {
+      const response = await api.post('/api/transactions/upload-screenshot', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
