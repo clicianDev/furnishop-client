@@ -41,14 +41,65 @@ function Model({ modelPath, selectedTexture }) {
   const { scene } = useGLTF(modelPath);
   const texturePath = getS3Url(`textures/${selectedTexture.folder}`);
   
-  // Load base color with TextureLoader
-  const colorMap = useLoader(THREE.TextureLoader, `${texturePath}/basecolor.jpg`);
-  
-  // Load EXR files with EXRLoader
-  const normalMap = useLoader(EXRLoader, `${texturePath}/normal.exr`);
-  const roughnessMap = useLoader(EXRLoader, `${texturePath}/roughness.exr`);
+  // Create texture loaders with crossOrigin configured
+  const [colorMap, setColorMap] = React.useState(null);
+  const [normalMap, setNormalMap] = React.useState(null);
+  const [roughnessMap, setRoughnessMap] = React.useState(null);
 
   React.useEffect(() => {
+    // Reset textures when path changes
+    setColorMap(null);
+    setNormalMap(null);
+    setRoughnessMap(null);
+
+    // Load base color with TextureLoader
+    const textureLoader = new THREE.TextureLoader();
+    
+    // Add cache-busting parameter and configure loader
+    const cacheBuster = `?t=${Date.now()}`;
+    
+    textureLoader.load(
+      `${texturePath}/basecolor.jpg${cacheBuster}`,
+      (texture) => {
+        texture.colorSpace = THREE.SRGBColorSpace;
+        setColorMap(texture);
+      },
+      undefined,
+      (error) => {
+        console.error('Failed to load base color texture:', error);
+        console.error('Attempted URL:', `${texturePath}/basecolor.jpg`);
+      }
+    );
+
+    // Load EXR files with EXRLoader
+    const exrLoader = new EXRLoader();
+    
+    exrLoader.load(
+      `${texturePath}/normal.exr${cacheBuster}`,
+      (texture) => {
+        setNormalMap(texture);
+      },
+      undefined,
+      (error) => {
+        console.warn('Failed to load normal map texture:', error);
+      }
+    );
+
+    exrLoader.load(
+      `${texturePath}/roughness.exr${cacheBuster}`,
+      (texture) => {
+        setRoughnessMap(texture);
+      },
+      undefined,
+      (error) => {
+        console.warn('Failed to load roughness map texture:', error);
+      }
+    );
+  }, [texturePath]);
+
+  React.useEffect(() => {
+    if (!colorMap) return; // Wait for textures to load
+
     scene.traverse((child) => {
       if (child.isMesh && child.material) {
         // Check if the material name is "base" (case-insensitive)
