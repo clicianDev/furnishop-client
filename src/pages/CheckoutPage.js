@@ -7,7 +7,7 @@ const CheckoutPage = () => {
   const navigate = useNavigate();
   const [cart, setCart] = useState([]);
   const [paymentMethods, setPaymentMethods] = useState([]);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('cod'); // Default to Cash on Delivery
   const [shippingInfo, setShippingInfo] = useState({
     address: '',
     city: '',
@@ -33,9 +33,7 @@ const CheckoutPage = () => {
     try {
       const response = await api.get('/api/payment-methods');
       setPaymentMethods(response.data);
-      if (response.data.length > 0) {
-        setSelectedPaymentMethod(response.data[0]);
-      }
+      // Keep COD as default, don't auto-select eWallet methods
     } catch (error) {
       console.error('Failed to fetch payment methods:', error);
     }
@@ -167,24 +165,27 @@ const CheckoutPage = () => {
       return;
     }
 
-    // If no screenshot, require all payment fields
-    if (!transactionScreenshot) {
-      if (!paymentInfo.referenceNumber || !paymentInfo.senderNumber || !paymentInfo.senderName) {
-        alert('Please fill in all payment information or upload a transaction screenshot');
-        return;
-      }
+    // Only require payment info for eWallet methods (not COD)
+    if (selectedPaymentMethod !== 'cod') {
+      // If no screenshot, require all payment fields
+      if (!transactionScreenshot) {
+        if (!paymentInfo.referenceNumber || !paymentInfo.senderNumber || !paymentInfo.senderName) {
+          alert('Please fill in all payment information or upload a transaction screenshot');
+          return;
+        }
 
-      if (!/^\+63\d{10}$/.test(paymentInfo.senderNumber)) {
-        alert('Please enter a valid sender number (+63 followed by 10 digits)');
-        return;
+        if (!/^\+63\d{10}$/.test(paymentInfo.senderNumber)) {
+          alert('Please enter a valid sender number (+63 followed by 10 digits)');
+          return;
+        }
       }
     }
 
     try {
       let screenshotUrl = null;
 
-      // Upload screenshot if provided
-      if (transactionScreenshot) {
+      // Upload screenshot if provided (only for eWallet payments)
+      if (transactionScreenshot && selectedPaymentMethod !== 'cod') {
         screenshotUrl = await uploadScreenshotToS3();
         if (!screenshotUrl) {
           return;
@@ -199,13 +200,15 @@ const CheckoutPage = () => {
         })),
         totalAmount: calculateTotal(),
         shippingAddress: shippingInfo,
-        paymentMethod: {
-          provider: selectedPaymentMethod.serviceProvider,
-          referenceNumber: paymentInfo.referenceNumber,
-          senderNumber: paymentInfo.senderNumber,
-          senderName: paymentInfo.senderName,
-          screenshot: screenshotUrl
-        }
+        paymentMethod: selectedPaymentMethod === 'cod' 
+          ? { provider: 'Cash on Delivery' }
+          : {
+              provider: selectedPaymentMethod.serviceProvider,
+              referenceNumber: paymentInfo.referenceNumber,
+              senderNumber: paymentInfo.senderNumber,
+              senderName: paymentInfo.senderName,
+              screenshot: screenshotUrl
+            }
       };
 
       await api.post('/api/transactions', transactionData);
@@ -298,34 +301,57 @@ const CheckoutPage = () => {
               {/* Payment Method Section */}
               <div className="payment-method-section">
                 <h2>Payment Method</h2>
-                {paymentMethods.length === 0 ? (
-                  <p className="no-payment-methods">No payment methods available. Please contact support.</p>
-                ) : (
-                  <>
-                    <div className="payment-methods-grid">
-                      {paymentMethods.map((method) => (
-                        <div
-                          key={method._id}
-                          className={`payment-method-card ${selectedPaymentMethod?._id === method._id ? 'selected' : ''}`}
-                          onClick={() => setSelectedPaymentMethod(method)}
-                        >
-                          <input
-                            type="radio"
-                            name="paymentMethod"
-                            checked={selectedPaymentMethod?._id === method._id}
-                            onChange={() => setSelectedPaymentMethod(method)}
-                          />
-                          <div className="payment-method-info">
-                            <span className={`provider-badge ${method.serviceProvider.toLowerCase()}`}>
-                              {method.serviceProvider}
-                            </span>
-                            <span className="payment-type">{method.type}</span>
-                          </div>
-                        </div>
-                      ))}
+                <div className="payment-methods-grid">
+                  {/* Cash on Delivery Option */}
+                  <div
+                    className={`payment-method-card ${selectedPaymentMethod === 'cod' ? 'selected' : ''}`}
+                    onClick={() => setSelectedPaymentMethod('cod')}
+                  >
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      checked={selectedPaymentMethod === 'cod'}
+                      onChange={() => setSelectedPaymentMethod('cod')}
+                    />
+                    <div className="payment-method-info">
+                      <span className="provider-badge cod">
+                        Cash on Delivery
+                      </span>
+                      <span className="payment-type">Pay when you receive</span>
                     </div>
+                  </div>
 
-                    {selectedPaymentMethod && (
+                  {/* eWallet Payment Methods */}
+                  {paymentMethods.length === 0 ? (
+                    <p className="no-ewallet-notice">eWallet payment options coming soon</p>
+                  ) : (
+                    paymentMethods.map((method) => (
+                      <div
+                        key={method._id}
+                        className={`payment-method-card ${selectedPaymentMethod?._id === method._id ? 'selected' : ''}`}
+                        onClick={() => setSelectedPaymentMethod(method)}
+                      >
+                        <input
+                          type="radio"
+                          name="paymentMethod"
+                          checked={selectedPaymentMethod?._id === method._id}
+                          onChange={() => setSelectedPaymentMethod(method)}
+                        />
+                        <div className="payment-method-info">
+                          <span className={`provider-badge ${method.serviceProvider.toLowerCase()}`}>
+                            {method.serviceProvider}
+                          </span>
+                          <span className="payment-account-number">
+                            {method.accountNumber.slice(0, -4).replace(/\d/g, '*') + method.accountNumber.slice(-4)}
+                          </span>
+                          <span className="payment-type">{method.type}</span>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                {selectedPaymentMethod && selectedPaymentMethod !== 'cod' && (
                       <div className="payment-details">
                         <div className="qr-section">
                           <h3>Scan QR Code to Pay</h3>
@@ -439,8 +465,6 @@ const CheckoutPage = () => {
                         </div>
                       </div>
                     )}
-                  </>
-                )}
               </div>
 
               <div className="order-summary">
