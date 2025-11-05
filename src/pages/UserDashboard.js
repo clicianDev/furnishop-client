@@ -395,6 +395,17 @@ const UserDashboard = () => {
               <button className="modal-close" onClick={handleCloseRepairModal}>×</button>
             </div>
             <form onSubmit={handleSubmitRepairRequest}>
+              {/* Important Notice */}
+              <div className="important-notice">
+                <h3>Important Notice:</h3>
+                <ul>
+                  <li>Only FurniShop furniture is eligible for repair services</li>
+                  <li>Minor damage repairs may be provided at no cost</li>
+                  <li>Admin will review and approve/deny based on eligibility</li>
+                  <li>You will be notified of the decision via email</li>
+                </ul>
+              </div>
+              
               <div className="form-group">
                 <label htmlFor="repairDescription">Description of Issue *</label>
                 <textarea
