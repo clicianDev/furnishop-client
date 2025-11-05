@@ -551,6 +551,53 @@
   word-break: break-all;
 }
 
+/* File Upload Styles */
+.file-input {
+  padding: 0.5rem;
+  border: 1px solid #d4d4d4;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  width: 100%;
+  cursor: pointer;
+  background-color: white;
+}
+
+.file-input:focus {
+  outline: none;
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.image-preview-container {
+  margin-top: 0.75rem;
+  border: 1px solid #e5e5e5;
+  border-radius: 0.375rem;
+  padding: 0.5rem;
+  background-color: #fafafa;
+}
+
+.image-preview {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 0.375rem;
+  display: block;
+  margin: 0 auto;
+}
+
+.file-selected {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #16a34a;
+  font-style: italic;
+}
+
+.upload-status {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #8b5cf6;
+  font-style: italic;
+}
+
 @media (max-width: 640px) {
   .admin-products-page {
     padding: 1rem;
@@ -564,3 +611,4 @@
     grid-template-columns: 1fr;
   }
 }
+

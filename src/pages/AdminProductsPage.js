@@ -30,6 +30,15 @@ const AdminProductsPage = () => {
     variantName: ''
   });
 
+  // File upload states
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState('');
+  const [modelFile, setModelFile] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingModel, setUploadingModel] = useState(false);
+  const [modelCounter, setModelCounter] = useState(1);
+  const [imageCounter, setImageCounter] = useState(1);
+
   const categories = ['all', 'Sofas', 'Beds', 'Chairs', 'Tables', 'Cabinets', 'Wardrobes', 'Doors'];
 
   useEffect(() => {
@@ -71,6 +80,8 @@ const AdminProductsPage = () => {
       image: product.image || '',
       models: product.models || []
     });
+    setImagePreview(product.image || '');
+    setModelCounter((product.models || []).length + 1);
   };
 
   const handleAddProduct = () => {
@@ -90,6 +101,11 @@ const AdminProductsPage = () => {
       description: '',
       variantName: ''
     });
+    setImageFile(null);
+    setImagePreview('');
+    setModelFile(null);
+    setModelCounter(1);
+    setImageCounter(1);
   };
 
   const handleDelete = (product) => {
@@ -121,15 +137,144 @@ const AdminProductsPage = () => {
     });
   };
 
-  const handleAddModel = () => {
-    if (!currentModel.modelUrl || !currentModel.price || !currentModel.description || !currentModel.variantName) {
+  // Handle image file selection
+  const handleImageFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+      if (!allowedTypes.includes(file.type)) {
+        alert('Only JPG, JPEG, and PNG files are allowed!');
+        e.target.value = '';
+        return;
+      }
+
+      // Validate file size (10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        alert('File size must be less than 10MB');
+        e.target.value = '';
+        return;
+      }
+
+      setImageFile(file);
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Handle model file selection
+  const handleModelFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      const ext = file.name.split('.').pop().toLowerCase();
+      if (ext !== 'glb') {
+        alert('Only GLB files are allowed for 3D models!');
+        e.target.value = '';
+        return;
+      }
+
+      // Validate file size (50MB)
+      if (file.size > 50 * 1024 * 1024) {
+        alert('File size must be less than 50MB');
+        e.target.value = '';
+        return;
+      }
+
+      setModelFile(file);
+    }
+  };
+
+  // Upload image to S3
+  const uploadImageToS3 = async () => {
+    if (!imageFile || !productForm.name) {
+      alert('Please enter product name and select an image file');
+      return null;
+    }
+
+    setUploadingImage(true);
+    try {
+      const formData = new FormData();
+      formData.append('image', imageFile);
+      formData.append('name', productForm.name);
+      formData.append('imageIndex', imageCounter.toString());
+
+      const response = await api.post('/api/products/upload-image', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      setImageCounter(imageCounter + 1);
+      return response.data.imageUrl;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Failed to upload image: ' + (error.response?.data?.message || error.message));
+      return null;
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  // Upload model to S3
+  const uploadModelToS3 = async () => {
+    if (!modelFile || !productForm.name) {
+      alert('Please enter product name and select a model file');
+      return null;
+    }
+
+    setUploadingModel(true);
+    try {
+      const formData = new FormData();
+      formData.append('model', modelFile);
+      formData.append('productName', productForm.name);
+      formData.append('modelIndex', modelCounter.toString());
+
+      const response = await api.post('/api/products/upload-model', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      setModelCounter(modelCounter + 1);
+      return response.data.modelUrl;
+    } catch (error) {
+      console.error('Error uploading model:', error);
+      alert('Failed to upload model: ' + (error.response?.data?.message || error.message));
+      return null;
+    } finally {
+      setUploadingModel(false);
+    }
+  };
+
+  const handleAddModel = async () => {
+    if (!currentModel.price || !currentModel.description || !currentModel.variantName) {
       alert('Please fill all model fields');
+      return;
+    }
+
+    if (!modelFile) {
+      alert('Please select a GLB model file');
+      return;
+    }
+
+    // Upload model file first
+    const modelUrl = await uploadModelToS3();
+    if (!modelUrl) {
       return;
     }
     
     setProductForm({
       ...productForm,
-      models: [...productForm.models, { ...currentModel, price: parseFloat(currentModel.price) }]
+      models: [...productForm.models, { 
+        ...currentModel, 
+        modelUrl,
+        price: parseFloat(currentModel.price) 
+      }]
     });
     
     setCurrentModel({
@@ -138,6 +283,10 @@ const AdminProductsPage = () => {
       description: '',
       variantName: ''
     });
+    setModelFile(null);
+    // Reset file input
+    const fileInput = document.querySelector('input[name="modelFile"]');
+    if (fileInput) fileInput.value = '';
   };
 
   const handleRemoveModel = (index) => {
@@ -157,11 +306,26 @@ const AdminProductsPage = () => {
     }
 
     try {
+      let imageUrl = productForm.image;
+
+      // Upload image if a new file is selected
+      if (imageFile) {
+        imageUrl = await uploadImageToS3();
+        if (!imageUrl) {
+          return;
+        }
+      }
+
+      const productData = {
+        ...productForm,
+        image: imageUrl
+      };
+
       if (editingProduct) {
-        await api.put(`/api/products/${editingProduct}`, productForm);
+        await api.put(`/api/products/${editingProduct}`, productData);
         alert('Product updated successfully!');
       } else {
-        await api.post('/api/products', productForm);
+        await api.post('/api/products', productData);
         alert('Product added successfully!');
       }
       
@@ -169,9 +333,15 @@ const AdminProductsPage = () => {
       setEditingProduct(null);
       setProductForm({ name: '', description: '', price: '', category: 'Tables', stock: '', image: '', models: [] });
       setCurrentModel({ modelUrl: '', price: '', description: '', variantName: '' });
+      setImageFile(null);
+      setImagePreview('');
+      setModelFile(null);
+      setModelCounter(1);
+      setImageCounter(1);
       fetchProducts();
     } catch (error) {
-      alert('Failed to save product');
+      console.error('Error saving product:', error);
+      alert('Failed to save product: ' + (error.response?.data?.message || error.message));
     }
   };
 
@@ -180,6 +350,11 @@ const AdminProductsPage = () => {
     setAddingProduct(false);
     setProductForm({ name: '', description: '', price: '', category: 'Tables', stock: '', image: '', models: [] });
     setCurrentModel({ modelUrl: '', price: '', description: '', variantName: '' });
+    setImageFile(null);
+    setImagePreview('');
+    setModelFile(null);
+    setModelCounter(1);
+    setImageCounter(1);
   };
 
   if (loading) return <div className="loading">Loading...</div>;
@@ -383,14 +558,20 @@ const AdminProductsPage = () => {
                 />
               </div>
               <div className="form-group">
-                <label>Image URL</label>
+                <label>Product Image * (JPG, JPEG, PNG only)</label>
                 <input
-                  type="url"
-                  name="image"
-                  value={productForm.image}
-                  onChange={handleProductInputChange}
-                  placeholder="https://example.com/image.jpg"
+                  type="file"
+                  name="imageFile"
+                  onChange={handleImageFileChange}
+                  accept=".jpg,.jpeg,.png"
+                  className="file-input"
                 />
+                {imagePreview && (
+                  <div className="image-preview-container">
+                    <img src={imagePreview} alt="Preview" className="image-preview" />
+                  </div>
+                )}
+                {uploadingImage && <p className="upload-status">Uploading image...</p>}
               </div>
 
               {/* 3D Models Section */}
@@ -409,14 +590,15 @@ const AdminProductsPage = () => {
                       />
                     </div>
                     <div className="form-group">
-                      <label>Model URL</label>
+                      <label>3D Model File (.glb only)</label>
                       <input
-                        type="url"
-                        name="modelUrl"
-                        value={currentModel.modelUrl}
-                        onChange={handleModelInputChange}
-                        placeholder="/models/cabinet/cabinet-1.glb"
+                        type="file"
+                        name="modelFile"
+                        onChange={handleModelFileChange}
+                        accept=".glb"
+                        className="file-input"
                       />
+                      {modelFile && <p className="file-selected">Selected: {modelFile.name}</p>}
                     </div>
                   </div>
                   <div className="form-row-2">
@@ -447,8 +629,9 @@ const AdminProductsPage = () => {
                     type="button"
                     onClick={handleAddModel}
                     className="btn btn-secondary"
+                    disabled={uploadingModel}
                   >
-                    Add Model Variant
+                    {uploadingModel ? 'Uploading...' : 'Add Model Variant'}
                   </button>
                 </div>
 
