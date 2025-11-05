@@ -1,0 +1,271 @@
+/* Admin Payment Methods Page */
+.admin-payment-methods-page {
+  padding: 1.5rem 2rem;
+  width: 100%;
+}
+
+/* Table Card */
+.table-card {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e5e5;
+  overflow: hidden;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.payment-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.payment-table thead {
+  background-color: #f9fafb;
+  border-bottom: 2px solid #e5e5e5;
+}
+
+.payment-table th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.payment-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #e5e5e5;
+  font-size: 0.875rem;
+  color: #4b5563;
+}
+
+.payment-table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+.payment-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Provider Badge */
+.provider-cell {
+  display: flex;
+  align-items: center;
+}
+
+.provider-badge {
+  display: inline-block;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.provider-badge.gcash {
+  background-color: #e0f2fe;
+  color: #0369a1;
+}
+
+.provider-badge.paymaya {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+/* Account Number */
+.account-number {
+  font-family: 'Courier New', monospace;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+/* QR Thumbnail */
+.qr-thumbnail-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.qr-thumbnail {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 0.375rem;
+  border: 2px solid #e5e5e5;
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.qr-thumbnail:hover {
+  transform: scale(1.1);
+  border-color: #8b5cf6;
+}
+
+/* Status Badge */
+.status-badge {
+  display: inline-block;
+  padding: 0.375rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-active {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.status-inactive {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-edit {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+}
+
+.btn-edit:hover {
+  background-color: #dbeafe;
+}
+
+.btn-delete {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.btn-delete:hover {
+  background-color: #fecaca;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.empty-state svg {
+  margin: 0 auto 1rem;
+  color: #d4d4d4;
+}
+
+.empty-state p {
+  color: #737373;
+  margin-bottom: 1rem;
+}
+
+/* Form Hints */
+.form-hint {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Checkbox Label */
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 1.125rem;
+  height: 1.125rem;
+  cursor: pointer;
+}
+
+.checkbox-label span {
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+/* QR Preview */
+.qr-preview-container {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid #e5e5e5;
+  border-radius: 0.375rem;
+  background-color: #fafafa;
+  text-align: center;
+}
+
+.preview-label {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+}
+
+.qr-preview {
+  max-width: 200px;
+  max-height: 200px;
+  border-radius: 0.375rem;
+  border: 2px solid #8b5cf6;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Warning Text */
+.warning-text {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #dc2626;
+  font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .admin-payment-methods-page {
+    padding: 1rem;
+  }
+
+  .form-row-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .payment-table {
+    font-size: 0.75rem;
+  }
+
+  .payment-table th,
+  .payment-table td {
+    padding: 0.5rem;
+  }
+
+  .qr-thumbnail {
+    width: 40px;
+    height: 40px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+}

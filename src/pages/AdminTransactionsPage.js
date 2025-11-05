@@ -180,9 +180,43 @@ const AdminTransactionsPage = () => {
                       </div>
                       <div className="detail-item">
                         <p className="detail-label">Payment Method</p>
-                        <p className="detail-value">{transaction.paymentMethod || 'Cash on Delivery'}</p>
+                        <p className="detail-value">{transaction.paymentMethod?.provider || 'Cash on Delivery'}</p>
                       </div>
                     </div>
+                    {transaction.paymentMethod?.provider && (
+                      <div className="payment-info">
+                        <p className="payment-info-label">Payment Details:</p>
+                        {transaction.paymentMethod.screenshot ? (
+                          <div className="payment-screenshot-section">
+                            <p className="screenshot-label">Transaction Screenshot:</p>
+                            <div className="screenshot-thumbnail-container">
+                              <img 
+                                src={transaction.paymentMethod.screenshot} 
+                                alt="Transaction Screenshot"
+                                className="transaction-screenshot-thumb"
+                                onClick={() => window.open(transaction.paymentMethod.screenshot, '_blank')}
+                              />
+                            </div>
+                            <small className="screenshot-hint">Click to view full size</small>
+                          </div>
+                        ) : (
+                          <div className="payment-info-grid">
+                            <div className="payment-detail">
+                              <span className="payment-detail-label">Reference Number:</span>
+                              <span className="payment-detail-value">{transaction.paymentMethod.referenceNumber}</span>
+                            </div>
+                            <div className="payment-detail">
+                              <span className="payment-detail-label">Sender Number:</span>
+                              <span className="payment-detail-value">{transaction.paymentMethod.senderNumber}</span>
+                            </div>
+                            <div className="payment-detail">
+                              <span className="payment-detail-label">Sender Name:</span>
+                              <span className="payment-detail-value">{transaction.paymentMethod.senderName}</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
                     {transaction.shippingAddress && (
                       <div className="shipping-address">
                         <p className="address-label">Shipping Address:</p>

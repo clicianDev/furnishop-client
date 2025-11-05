@@ -15,6 +15,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminProductsPage from './pages/AdminProductsPage';
 import AdminUsersPage from './pages/AdminUsersPage';
 import AdminTransactionsPage from './pages/AdminTransactionsPage';
+import AdminPaymentMethods from './pages/AdminPaymentMethods';
 import './App.css';
 
 function App() {
@@ -53,6 +54,7 @@ function App() {
                   <Route path="/products" element={<AdminProductsPage />} />
                   <Route path="/users" element={<AdminUsersPage />} />
                   <Route path="/transactions" element={<AdminTransactionsPage />} />
+                  <Route path="/payment-methods" element={<AdminPaymentMethods />} />
                 </Routes>
               </AdminLayout>
             }
