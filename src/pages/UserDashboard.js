@@ -9,6 +9,7 @@ const UserDashboard = () => {
   const [orders, setOrders] = useState([]);
   const [customOrders, setCustomOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('orders'); // 'orders' or 'custom'
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -86,125 +87,180 @@ const UserDashboard = () => {
           )}
         </div>
 
-        <div className="orders-section">
-          <h2>My Orders</h2>
-          {orders.length === 0 ? (
-            <div className="card">
-              <p>No orders yet. Start shopping!</p>
-            </div>
-          ) : (
-            <div className="orders-list">
-              {orders.map(order => (
-                <div key={order._id} className="order-card card">
-                  <div className="order-header">
-                    <h3>Order #{order._id.substring(0, 8)}</h3>
-                    <span className={`status ${order.status}`}>{order.status}</span>
-                  </div>
-                  <div className="order-details">
-                    <p><strong>Date:</strong> {new Date(order.createdAt).toLocaleDateString()}</p>
-                    <p><strong>Total:</strong> ₱{order.totalAmount.toFixed(2)}</p>
-                    <p><strong>Items:</strong> {order.products.length}</p>
-                  </div>
-                  <div className="order-shipping">
-                    <p><strong>Shipping Address:</strong></p>
-                    <p>{order.shippingAddress.address}, {order.shippingAddress.city}</p>
-                    <p>{order.shippingAddress.zipCode}, {order.shippingAddress.country}</p>
-                  </div>
-                  <div className="order-products">
-                    <h4>Products:</h4>
-                    {order.products.map((product, index) => (
-                      <div key={index} className="order-product-item">
-                        <p>Product ID: {product.productId}</p>
-                        <p>Quantity: {product.quantity} × ₱{product.price.toFixed(2)}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <div className="orders-main-section">
+          {/* Tab Navigation */}
+          <div className="tab-navigation">
+            <button
+              className={`tab-button ${activeTab === 'orders' ? 'active' : ''}`}
+              onClick={() => setActiveTab('orders')}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <path d="M16 10a4 4 0 0 1-8 0"></path>
+              </svg>
+              My Orders
+              {orders.length > 0 && <span className="tab-count">{orders.length}</span>}
+            </button>
+            <button
+              className={`tab-button ${activeTab === 'custom' ? 'active' : ''}`}
+              onClick={() => setActiveTab('custom')}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M20 7h-9"></path>
+                <path d="M14 17H5"></path>
+                <circle cx="17" cy="17" r="3"></circle>
+                <circle cx="7" cy="7" r="3"></circle>
+              </svg>
+              My Custom Furniture Requests
+              {customOrders.length > 0 && <span className="tab-count">{customOrders.length}</span>}
+            </button>
+          </div>
 
-        <div className="custom-orders-section">
-          <h2>My Custom Furniture Requests</h2>
-          {customOrders.length === 0 ? (
-            <div className="card">
-              <p>No custom furniture requests yet.</p>
-              <button 
-                className="btn-create-custom"
-                onClick={() => navigate('/custom-furniture')}
-              >
-                Create Custom Furniture
-              </button>
-            </div>
-          ) : (
-            <div className="orders-list">
-              {customOrders.map(order => (
-                <div key={order._id} className="custom-order-card card">
-                  <div className="order-header">
-                    <div className="order-title-with-badge">
-                      <h3>Custom Order #{order._id.substring(0, 8)}</h3>
-                      <span className="custom-badge">CUSTOM REQUEST</span>
-                    </div>
-                    <span className={`status ${getStatusColor(order.status)}`}>
-                      {order.status}
-                    </span>
+          {/* Tab Content */}
+          <div className="tab-content">
+            {activeTab === 'orders' && (
+              <div className="orders-section">
+                {orders.length === 0 ? (
+                  <div className="empty-state card">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                      <line x1="3" y1="6" x2="21" y2="6"></line>
+                      <path d="M16 10a4 4 0 0 1-8 0"></path>
+                    </svg>
+                    <h3>No orders yet</h3>
+                    <p>Start shopping to see your orders here!</p>
+                    <button 
+                      className="btn-primary"
+                      onClick={() => navigate('/shop')}
+                    >
+                      Browse Products
+                    </button>
                   </div>
-                  <div className="order-details">
-                    <p><strong>Date:</strong> {new Date(order.createdAt).toLocaleDateString()}</p>
-                    <p><strong>Total:</strong> ₱{order.totalPrice.toLocaleString()}</p>
-                  </div>
-                  <div className="custom-order-specs">
-                    <h4>Specifications:</h4>
-                    <div className="specs-grid">
-                      <div className="spec-item">
-                        <span className="spec-label">Furniture Type:</span>
-                        <span className="spec-value">{order.furnitureType}</span>
-                      </div>
-                      <div className="spec-item">
-                        <span className="spec-label">Dimensions:</span>
-                        <span className="spec-value">{order.dimensions.width} × {order.dimensions.height} cm</span>
-                      </div>
-                      <div className="spec-item">
-                        <span className="spec-label">Wood Type:</span>
-                        <span className="spec-value">{order.woodType}</span>
-                      </div>
-                      <div className="spec-item">
-                        <span className="spec-label">Varnish Finish:</span>
-                        <span className="spec-value">{order.varnishType}</span>
-                      </div>
-                    </div>
-                    {order.notes && (
-                      <div className="order-notes">
-                        <p><strong>Notes:</strong> {order.notes}</p>
-                      </div>
-                    )}
-                    {order.images && order.images.length > 0 && (
-                      <div className="order-images">
-                        <p><strong>Reference Images:</strong></p>
-                        <div className="images-preview">
-                          {order.images.map((image, index) => (
-                            <img 
-                              key={index} 
-                              src={`${api.defaults.baseURL}/${image}`} 
-                              alt={`Reference ${index + 1}`}
-                              className="reference-image"
-                            />
+                ) : (
+                  <div className="orders-list">
+                    {orders.map(order => (
+                      <div key={order._id} className="order-card card">
+                        <div className="order-header">
+                          <h3>Order #{order._id.substring(0, 8)}</h3>
+                          <span className={`status ${order.status}`}>{order.status}</span>
+                        </div>
+                        <div className="order-details">
+                          <p><strong>Date:</strong> {new Date(order.createdAt).toLocaleDateString()}</p>
+                          <p><strong>Total:</strong> ₱{order.totalAmount.toFixed(2)}</p>
+                          <p><strong>Items:</strong> {order.products.length}</p>
+                        </div>
+                        <div className="order-shipping">
+                          <p><strong>Shipping Address:</strong></p>
+                          <p>{order.shippingAddress.address}, {order.shippingAddress.city}</p>
+                          <p>{order.shippingAddress.zipCode}, {order.shippingAddress.country}</p>
+                        </div>
+                        <div className="order-products">
+                          <h4>Products:</h4>
+                          {order.products.map((product, index) => (
+                            <div key={index} className="order-product-item">
+                              <p>Product ID: {product.productId}</p>
+                              <p>Quantity: {product.quantity} × ₱{product.price.toFixed(2)}</p>
+                            </div>
                           ))}
                         </div>
                       </div>
-                    )}
-                    {order.adminNotes && (
-                      <div className="admin-notes">
-                        <p><strong>Admin Response:</strong></p>
-                        <p className="admin-notes-text">{order.adminNotes}</p>
-                      </div>
-                    )}
+                    ))}
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
+                )}
+              </div>
+            )}
+
+            {activeTab === 'custom' && (
+              <div className="custom-orders-section">
+                {customOrders.length === 0 ? (
+                  <div className="empty-state card">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M20 7h-9"></path>
+                      <path d="M14 17H5"></path>
+                      <circle cx="17" cy="17" r="3"></circle>
+                      <circle cx="7" cy="7" r="3"></circle>
+                    </svg>
+                    <h3>No custom furniture requests yet</h3>
+                    <p>Create your dream furniture with custom specifications!</p>
+                    <button 
+                      className="btn-create-custom"
+                      onClick={() => navigate('/custom-furniture')}
+                    >
+                      Create Custom Furniture
+                    </button>
+                  </div>
+                ) : (
+                  <div className="orders-list">
+                    {customOrders.map(order => (
+                      <div key={order._id} className="custom-order-card card">
+                        <div className="order-header">
+                          <div className="order-title-with-badge">
+                            <h3>Custom Order #{order._id.substring(0, 8)}</h3>
+                            <span className="custom-badge">CUSTOM REQUEST</span>
+                          </div>
+                          <span className={`status ${getStatusColor(order.status)}`}>
+                            {order.status}
+                          </span>
+                        </div>
+                        <div className="order-details">
+                          <p><strong>Date:</strong> {new Date(order.createdAt).toLocaleDateString()}</p>
+                          <p><strong>Total:</strong> ₱{order.totalPrice.toLocaleString()}</p>
+                        </div>
+                        <div className="custom-order-specs">
+                          <h4>Specifications:</h4>
+                          <div className="specs-grid">
+                            <div className="spec-item">
+                              <span className="spec-label">Furniture Type:</span>
+                              <span className="spec-value">{order.furnitureType}</span>
+                            </div>
+                            <div className="spec-item">
+                              <span className="spec-label">Dimensions:</span>
+                              <span className="spec-value">{order.dimensions.width} × {order.dimensions.height} cm</span>
+                            </div>
+                            <div className="spec-item">
+                              <span className="spec-label">Wood Type:</span>
+                              <span className="spec-value">{order.woodType}</span>
+                            </div>
+                            <div className="spec-item">
+                              <span className="spec-label">Varnish Finish:</span>
+                              <span className="spec-value">{order.varnishType}</span>
+                            </div>
+                          </div>
+                          {order.notes && (
+                            <div className="order-notes">
+                              <p><strong>Notes:</strong> {order.notes}</p>
+                            </div>
+                          )}
+                          {order.images && order.images.length > 0 && (
+                            <div className="order-images">
+                              <p><strong>Reference Images:</strong></p>
+                              <div className="images-preview">
+                                {order.images.map((image, index) => (
+                                  <img 
+                                    key={index} 
+                                    src={`${api.defaults.baseURL}/${image}`} 
+                                    alt={`Reference ${index + 1}`}
+                                    className="reference-image"
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {order.adminNotes && (
+                            <div className="admin-notes">
+                              <p><strong>Admin Response:</strong></p>
+                              <p className="admin-notes-text">{order.adminNotes}</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

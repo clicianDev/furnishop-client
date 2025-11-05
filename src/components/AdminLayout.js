@@ -9,7 +9,7 @@ const AdminLayout = ({ children }) => {
       {/* Top Header */}
       <header className="admin-header">
         <div className="admin-header-content">
-          <Link to="/admin" className="admin-logo-link">
+          <Link to="/" className="admin-logo-link">
             <div className="admin-logo-icon">
               <svg 
                 xmlns="http://www.w3.org/2000/svg" 

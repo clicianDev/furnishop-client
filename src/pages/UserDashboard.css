@@ -9,34 +9,13 @@
 
 .dashboard-grid {
   display: grid;
-  grid-template-columns: 1fr 2fr;
+  grid-template-columns: 350px 1fr;
   gap: 30px;
+  align-items: start;
 }
 
-.orders-section,
-.custom-orders-section {
-  grid-column: span 1;
-}
-
-.user-info {
-  grid-column: span 2;
-}
-
-@media (min-width: 968px) {
-  .user-info {
-    grid-column: 1;
-    grid-row: 1;
-  }
-  
-  .orders-section {
-    grid-column: 2;
-    grid-row: 1;
-  }
-  
-  .custom-orders-section {
-    grid-column: 1 / -1;
-    grid-row: 2;
-  }
+.orders-main-section {
+  width: 100%;
 }
 
 .user-info {
@@ -55,6 +34,115 @@
 
 .profile-details strong {
   color: #333;
+}
+
+/* Tab Navigation */
+.tab-navigation {
+  display: flex;
+  gap: 0;
+  margin-bottom: 30px;
+  background: #f8f9fa;
+  padding: 6px;
+  border-radius: 12px;
+  overflow-x: auto;
+}
+
+.tab-button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 20px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  position: relative;
+}
+
+.tab-button:hover {
+  background: rgba(249, 115, 22, 0.1);
+  color: #f97316;
+}
+
+.tab-button.active {
+  background: white;
+  color: #f97316;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.tab-button svg {
+  flex-shrink: 0;
+}
+
+.tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  background: #f97316;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 11px;
+  margin-left: 4px;
+}
+
+.tab-button.active .tab-count {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+}
+
+.tab-content {
+  width: 100%;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 60px 40px;
+  background: white;
+}
+
+.empty-state svg {
+  color: #cbd5e0;
+  margin-bottom: 20px;
+}
+
+.empty-state h3 {
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.empty-state p {
+  color: #666;
+  margin-bottom: 25px;
+  font-size: 1rem;
+}
+
+.btn-primary {
+  padding: 12px 28px;
+  background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
 }
 
 .orders-section h2 {
@@ -348,11 +436,55 @@
     grid-column: 1;
   }
   
+  .tab-button {
+    font-size: 0.85rem;
+    padding: 12px 16px;
+  }
+  
+  .tab-button span:not(.tab-count) {
+    display: none;
+  }
+  
+  .tab-navigation {
+    justify-content: center;
+  }
+  
   .specs-grid {
     grid-template-columns: 1fr;
   }
   
   .images-preview {
     grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  }
+  
+  .empty-state {
+    padding: 40px 20px;
+  }
+  
+  .empty-state h3 {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .tab-button {
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.75rem;
+    padding: 10px 12px;
+  }
+  
+  .tab-button span:not(.tab-count) {
+    display: inline;
+    font-size: 0.7rem;
+  }
+  
+  .tab-count {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    min-width: 18px;
+    height: 18px;
+    font-size: 0.65rem;
   }
 }
