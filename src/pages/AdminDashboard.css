@@ -103,6 +103,11 @@
   color: #9333ea;
 }
 
+.stat-icon-emerald {
+  background-color: #d1fae5;
+  color: #10b981;
+}
+
 .stat-label {
   font-size: 0.875rem;
   color: #525252;
@@ -343,4 +348,54 @@
   .dashboard-title {
     font-size: 1.5rem;
   }
+}
+
+/* Repair Request Badge */
+.repair-request-badge {
+  font-size: 0.625rem;
+  padding: 3px 8px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border-radius: 3px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.repair-description-preview {
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 4px;
+  font-style: italic;
+}
+
+/* Repair Status Colors */
+.repair-status-pending {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.repair-status-reviewing {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.repair-status-approved {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.repair-status-in-repair {
+  background-color: #e0e7ff;
+  color: #3730a3;
+}
+
+.repair-status-completed {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.repair-status-rejected {
+  background-color: #fee2e2;
+  color: #991b1b;
 }

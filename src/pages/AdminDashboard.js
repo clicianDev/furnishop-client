@@ -10,10 +10,12 @@ const AdminDashboard = () => {
     totalOrders: 0,
     totalProducts: 0,
     totalUsers: 0,
-    customOrders: 0
+    customOrders: 0,
+    repairRequests: 0
   });
   const [recentOrders, setRecentOrders] = useState([]);
   const [recentCustomOrders, setRecentCustomOrders] = useState([]);
+  const [recentRepairRequests, setRecentRepairRequests] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -29,17 +31,19 @@ const AdminDashboard = () => {
   const fetchDashboardData = async () => {
     try {
       // Fetch all data concurrently
-      const [productsRes, usersRes, transactionsRes, customOrdersRes] = await Promise.all([
+      const [productsRes, usersRes, transactionsRes, customOrdersRes, repairRequestsRes] = await Promise.all([
         api.get('/api/products'),
         api.get('/api/users'),
         api.get('/api/transactions'),
-        api.get('/api/custom-orders')
+        api.get('/api/custom-orders'),
+        api.get('/api/repair-requests')
       ]);
 
       const products = Array.isArray(productsRes.data) ? productsRes.data : [];
       const users = Array.isArray(usersRes.data) ? usersRes.data : [];
       const transactions = Array.isArray(transactionsRes.data) ? transactionsRes.data : [];
       const customOrders = Array.isArray(customOrdersRes.data) ? customOrdersRes.data : [];
+      const repairRequests = Array.isArray(repairRequestsRes.data) ? repairRequestsRes.data : [];
 
       // Calculate stats
       const totalSales = transactions.reduce((sum, t) => sum + (t.totalAmount || 0), 0);
@@ -50,7 +54,8 @@ const AdminDashboard = () => {
         totalOrders: transactions.length,
         totalProducts: products.length,
         totalUsers: users.length,
-        customOrders: customOrders.length
+        customOrders: customOrders.length,
+        repairRequests: repairRequests.length
       });
 
       // Get recent orders (last 4)
@@ -83,6 +88,21 @@ const AdminDashboard = () => {
         }));
       
       setRecentCustomOrders(recentCustom);
+      
+      // Get recent repair requests (last 4)
+      const recentRepairs = repairRequests
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 4)
+        .map(r => ({
+          id: r._id,
+          customer: r.userId?.name || 'Guest',
+          orderType: r.orderType === 'Transaction' ? 'Regular Order' : 'Custom Order',
+          status: r.status,
+          date: new Date(r.createdAt).toLocaleDateString(),
+          description: r.description
+        }));
+      
+      setRecentRepairRequests(recentRepairs);
       setLoading(false);
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
@@ -191,6 +211,18 @@ const AdminDashboard = () => {
           <p className="stat-label">Customers</p>
           <p className="stat-value">{stats.totalUsers}</p>
         </div>
+
+        <div className="stat-card">
+          <div className="stat-header">
+            <div className="stat-icon stat-icon-emerald">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+              </svg>
+            </div>
+          </div>
+          <p className="stat-label">Repair Requests</p>
+          <p className="stat-value">{stats.repairRequests}</p>
+        </div>
       </div>
 
       <div className="dashboard-content">
@@ -249,6 +281,37 @@ const AdminDashboard = () => {
               ))
             ) : (
               <p className="no-data">No custom orders yet</p>
+            )}
+          </div>
+        </div>
+
+        {/* Recent Repair Requests */}
+        <div className="dashboard-card orders-card">
+          <div className="card-header">
+            <h2 className="card-title">Recent Repair Requests</h2>
+            <Link to="/admin/transactions" className="view-all-link">View All</Link>
+          </div>
+          <div className="orders-list">
+            {recentRepairRequests.length > 0 ? (
+              recentRepairRequests.map((request) => (
+                <div key={request.id} className="order-item repair-request-item">
+                  <div className="order-info">
+                    <div className="order-header-with-tag">
+                      <p className="order-id">#{request.id.substring(0, 8)}</p>
+                      <span className="repair-request-badge">Repair Request</span>
+                    </div>
+                    <p className="order-customer">{request.customer} - {request.orderType}</p>
+                    <p className="repair-description-preview">{request.description.substring(0, 50)}{request.description.length > 50 ? '...' : ''}</p>
+                  </div>
+                  <div className="order-details">
+                    <span className={`order-status repair-status-${request.status}`}>
+                      {request.status}
+                    </span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="no-data">No repair requests yet</p>
             )}
           </div>
         </div>
