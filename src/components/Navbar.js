@@ -72,6 +72,11 @@ const Navbar = () => {
               Shop
             </Link>
           </li>
+          <li>
+            <Link to="/custom-furniture" className={isActive('/custom-furniture') ? 'active' : ''}>
+              Custom
+            </Link>
+          </li>
           {isLoggedIn ? (
             <>
               <li>
@@ -146,6 +151,13 @@ const Navbar = () => {
             onClick={() => setMobileMenuOpen(false)}
           >
             Shop
+          </Link>
+          <Link 
+            to="/custom-furniture" 
+            className={isActive('/custom-furniture') ? 'active' : ''}
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Custom
           </Link>
           {isLoggedIn ? (
             <>

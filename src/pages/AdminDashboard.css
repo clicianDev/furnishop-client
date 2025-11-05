@@ -32,9 +32,15 @@
 /* Stats Grid */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 1.5rem;
   margin-bottom: 2rem;
+}
+
+@media (max-width: 1200px) {
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 @media (max-width: 1024px) {
@@ -87,6 +93,11 @@
   color: #d97706;
 }
 
+.stat-icon-orange {
+  background-color: #ffedd5;
+  color: #f97316;
+}
+
 .stat-icon-purple {
   background-color: #f3e8ff;
   color: #9333ea;
@@ -108,13 +119,27 @@
 /* Dashboard Content */
 .dashboard-content {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
 }
 
 @media (max-width: 1024px) {
   .dashboard-content {
     grid-template-columns: 1fr;
+  }
+}
+
+.orders-card {
+  grid-column: span 1;
+}
+
+.actions-card {
+  grid-column: span 2;
+}
+
+@media (max-width: 1024px) {
+  .actions-card {
+    grid-column: span 1;
   }
 }
 
@@ -182,6 +207,23 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+}
+
+.order-header-with-tag {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.custom-request-tag {
+  font-size: 0.625rem;
+  padding: 0.125rem 0.5rem;
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  color: white;
+  border-radius: 0.25rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
 }
 
 .order-id {

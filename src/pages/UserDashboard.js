@@ -7,6 +7,7 @@ const UserDashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [orders, setOrders] = useState([]);
+  const [customOrders, setCustomOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -17,6 +18,7 @@ const UserDashboard = () => {
     }
     fetchUserData();
     fetchOrders();
+    fetchCustomOrders();
   }, []);
 
   const fetchUserData = async () => {
@@ -36,6 +38,33 @@ const UserDashboard = () => {
     } catch (error) {
       console.error('Failed to fetch orders:', error);
       setLoading(false);
+    }
+  };
+
+  const fetchCustomOrders = async () => {
+    try {
+      const response = await api.get('/api/custom-orders');
+      setCustomOrders(response.data);
+    } catch (error) {
+      console.error('Failed to fetch custom orders:', error);
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'completed':
+      case 'approved':
+        return 'status-success';
+      case 'pending':
+        return 'status-pending';
+      case 'reviewing':
+      case 'processing':
+      case 'in-production':
+        return 'status-processing';
+      case 'cancelled':
+        return 'status-cancelled';
+      default:
+        return '';
     }
   };
 
@@ -89,6 +118,88 @@ const UserDashboard = () => {
                         <p>Quantity: {product.quantity} × ₱{product.price.toFixed(2)}</p>
                       </div>
                     ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="custom-orders-section">
+          <h2>My Custom Furniture Requests</h2>
+          {customOrders.length === 0 ? (
+            <div className="card">
+              <p>No custom furniture requests yet.</p>
+              <button 
+                className="btn-create-custom"
+                onClick={() => navigate('/custom-furniture')}
+              >
+                Create Custom Furniture
+              </button>
+            </div>
+          ) : (
+            <div className="orders-list">
+              {customOrders.map(order => (
+                <div key={order._id} className="custom-order-card card">
+                  <div className="order-header">
+                    <div className="order-title-with-badge">
+                      <h3>Custom Order #{order._id.substring(0, 8)}</h3>
+                      <span className="custom-badge">CUSTOM REQUEST</span>
+                    </div>
+                    <span className={`status ${getStatusColor(order.status)}`}>
+                      {order.status}
+                    </span>
+                  </div>
+                  <div className="order-details">
+                    <p><strong>Date:</strong> {new Date(order.createdAt).toLocaleDateString()}</p>
+                    <p><strong>Total:</strong> ₱{order.totalPrice.toLocaleString()}</p>
+                  </div>
+                  <div className="custom-order-specs">
+                    <h4>Specifications:</h4>
+                    <div className="specs-grid">
+                      <div className="spec-item">
+                        <span className="spec-label">Furniture Type:</span>
+                        <span className="spec-value">{order.furnitureType}</span>
+                      </div>
+                      <div className="spec-item">
+                        <span className="spec-label">Dimensions:</span>
+                        <span className="spec-value">{order.dimensions.width} × {order.dimensions.height} cm</span>
+                      </div>
+                      <div className="spec-item">
+                        <span className="spec-label">Wood Type:</span>
+                        <span className="spec-value">{order.woodType}</span>
+                      </div>
+                      <div className="spec-item">
+                        <span className="spec-label">Varnish Finish:</span>
+                        <span className="spec-value">{order.varnishType}</span>
+                      </div>
+                    </div>
+                    {order.notes && (
+                      <div className="order-notes">
+                        <p><strong>Notes:</strong> {order.notes}</p>
+                      </div>
+                    )}
+                    {order.images && order.images.length > 0 && (
+                      <div className="order-images">
+                        <p><strong>Reference Images:</strong></p>
+                        <div className="images-preview">
+                          {order.images.map((image, index) => (
+                            <img 
+                              key={index} 
+                              src={`${api.defaults.baseURL}/${image}`} 
+                              alt={`Reference ${index + 1}`}
+                              className="reference-image"
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {order.adminNotes && (
+                      <div className="admin-notes">
+                        <p><strong>Admin Response:</strong></p>
+                        <p className="admin-notes-text">{order.adminNotes}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}

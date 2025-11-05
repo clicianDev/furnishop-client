@@ -10,6 +10,7 @@ import Model3DViewerPage from './pages/Model3DViewerPage';
 import CheckoutPage from './pages/CheckoutPage';
 import LoginPage from './pages/LoginPage';
 import UserDashboard from './pages/UserDashboard';
+import CustomFurniturePage from './pages/CustomFurniturePage';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminProductsPage from './pages/AdminProductsPage';
 import AdminUsersPage from './pages/AdminUsersPage';
@@ -35,6 +36,7 @@ function App() {
                   <Route path="/checkout" element={<CheckoutPage />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/user-dashboard" element={<UserDashboard />} />
+                  <Route path="/custom-furniture" element={<CustomFurniturePage />} />
                 </Routes>
                 <Footer />
               </>

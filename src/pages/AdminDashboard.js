@@ -9,9 +9,11 @@ const AdminDashboard = () => {
     totalSales: 0,
     totalOrders: 0,
     totalProducts: 0,
-    totalUsers: 0
+    totalUsers: 0,
+    customOrders: 0
   });
   const [recentOrders, setRecentOrders] = useState([]);
+  const [recentCustomOrders, setRecentCustomOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -27,24 +29,28 @@ const AdminDashboard = () => {
   const fetchDashboardData = async () => {
     try {
       // Fetch all data concurrently
-      const [productsRes, usersRes, transactionsRes] = await Promise.all([
+      const [productsRes, usersRes, transactionsRes, customOrdersRes] = await Promise.all([
         api.get('/api/products'),
         api.get('/api/users'),
-        api.get('/api/transactions')
+        api.get('/api/transactions'),
+        api.get('/api/custom-orders')
       ]);
 
       const products = Array.isArray(productsRes.data) ? productsRes.data : [];
       const users = Array.isArray(usersRes.data) ? usersRes.data : [];
       const transactions = Array.isArray(transactionsRes.data) ? transactionsRes.data : [];
+      const customOrders = Array.isArray(customOrdersRes.data) ? customOrdersRes.data : [];
 
       // Calculate stats
       const totalSales = transactions.reduce((sum, t) => sum + (t.totalAmount || 0), 0);
+      const customOrdersSales = customOrders.reduce((sum, o) => sum + (o.totalPrice || 0), 0);
       
       setStats({
-        totalSales,
+        totalSales: totalSales + customOrdersSales,
         totalOrders: transactions.length,
         totalProducts: products.length,
-        totalUsers: users.length
+        totalUsers: users.length,
+        customOrders: customOrders.length
       });
 
       // Get recent orders (last 4)
@@ -56,10 +62,27 @@ const AdminDashboard = () => {
           customer: t.userId?.name || 'Guest',
           amount: t.totalAmount,
           status: t.status,
-          date: new Date(t.createdAt).toLocaleDateString()
+          date: new Date(t.createdAt).toLocaleDateString(),
+          isCustom: false
         }));
       
       setRecentOrders(recent);
+
+      // Get recent custom orders (last 4)
+      const recentCustom = customOrders
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 4)
+        .map(o => ({
+          id: o._id,
+          customer: o.userId?.name || 'Guest',
+          furnitureType: o.furnitureType,
+          amount: o.totalPrice,
+          status: o.status,
+          date: new Date(o.createdAt).toLocaleDateString(),
+          isCustom: true
+        }));
+      
+      setRecentCustomOrders(recentCustom);
       setLoading(false);
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
@@ -127,6 +150,20 @@ const AdminDashboard = () => {
 
         <div className="stat-card">
           <div className="stat-header">
+            <div className="stat-icon stat-icon-orange">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                <path d="M2 17l10 5 10-5"></path>
+                <path d="M2 12l10 5 10-5"></path>
+              </svg>
+            </div>
+          </div>
+          <p className="stat-label">Custom Orders</p>
+          <p className="stat-value">{stats.customOrders}</p>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-header">
             <div className="stat-icon stat-icon-amber">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <line x1="16.5" y1="9.4" x2="7.5" y2="4.21"></line>
@@ -181,6 +218,36 @@ const AdminDashboard = () => {
               ))
             ) : (
               <p className="no-data">No recent orders</p>
+            )}
+          </div>
+        </div>
+
+        {/* Recent Custom Orders */}
+        <div className="dashboard-card orders-card">
+          <div className="card-header">
+            <h2 className="card-title">Recent Custom Orders</h2>
+          </div>
+          <div className="orders-list">
+            {recentCustomOrders.length > 0 ? (
+              recentCustomOrders.map((order) => (
+                <div key={order.id} className="order-item">
+                  <div className="order-info">
+                    <div className="order-header-with-tag">
+                      <p className="order-id">#{order.id.substring(0, 8)}</p>
+                      <span className="custom-request-tag">Custom Request</span>
+                    </div>
+                    <p className="order-customer">{order.customer} - {order.furnitureType}</p>
+                  </div>
+                  <div className="order-details">
+                    <p className="order-amount">₱{order.amount.toLocaleString()}</p>
+                    <span className={`order-status ${getStatusColor(order.status)}`}>
+                      {order.status}
+                    </span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="no-data">No custom orders yet</p>
             )}
           </div>
         </div>
