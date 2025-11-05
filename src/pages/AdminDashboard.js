@@ -226,6 +226,7 @@ const AdminDashboard = () => {
         <div className="dashboard-card orders-card">
           <div className="card-header">
             <h2 className="card-title">Recent Custom Orders</h2>
+            <Link to="/admin/transactions" className="view-all-link">View All</Link>
           </div>
           <div className="orders-list">
             {recentCustomOrders.length > 0 ? (
