@@ -3,6 +3,7 @@ import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import { EXRLoader } from 'three/examples/jsm/loaders/EXRLoader';
+import { getS3Url } from '../config/s3Config';
 import './ARViewer.css';
 
 const patchWebXRHitTestSource = () => {
@@ -40,7 +41,7 @@ patchWebXRHitTestSource();
 
 function Model({ modelPath, selectedTexture, position, rotation, scale }) {
   const { scene } = useGLTF(modelPath);
-  const texturePath = `/textures/${selectedTexture.folder}`;
+  const texturePath = getS3Url(`textures/${selectedTexture.folder}`);
   
   // Load textures
   const colorMap = useLoader(THREE.TextureLoader, `${texturePath}/basecolor.jpg`);

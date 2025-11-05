@@ -1,20 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../config/axios';
+import { getS3Url } from '../config/s3Config';
 import Toast from '../components/Toast';
 import './CustomFurniturePage.css';
 
 const FURNITURE_TYPES = [
-  { name: 'Door', price: 15000, icon: '🚪' },
-  { name: 'Table', price: 25000, icon: '🪑' },
-  { name: 'Cabinet', price: 30000, icon: '🗄️' },
-  { name: 'Chair', price: 8000, icon: '💺' },
-  { name: 'Bed', price: 35000, icon: '🛏️' },
+  { name: 'Door', price: 8000, icon: '🚪' },
+  { name: 'Table', price: 12000, icon: '🪑' },
+  { name: 'Cabinet', price: 15000, icon: '🗄️' },
+  { name: 'Chair', price: 5000, icon: '💺' },
+  { name: 'Bed', price: 25000, icon: '🛏️' },
 ];
 
 const WOOD_TYPES = [
-  { name: 'Mahogany', multiplier: 1.5 },
-  { name: 'Gmelina', multiplier: 1.0 },
+  { name: 'Mahogany', displayName: 'Mahogany', multiplier: 1.5 },
+  { name: 'Gmelina', displayName: 'Gmelina', multiplier: 1.0 },
 ];
 
 const VARNISH_TYPES = [
@@ -22,28 +23,28 @@ const VARNISH_TYPES = [
     name: 'Plywood', 
     displayName: 'Plywood',
     price: 0,
-    image: '/textures/plywood/basecolor.jpg',
+    image: getS3Url('textures/plywood/basecolor.jpg'),
     folder: 'plywood'
   },
   { 
     name: 'Dark Wood', 
     displayName: 'Dark Wood',
     price: 2000,
-    image: '/textures/dark_wood/basecolor.jpg',
+    image: getS3Url('textures/dark_wood/basecolor.jpg'),
     folder: 'dark_wood'
   },
   { 
     name: 'Oak Veneer', 
     displayName: 'Oak Veneer',
     price: 2500,
-    image: '/textures/oak_veener/basecolor.jpg',
+    image: getS3Url('textures/oak_veener/basecolor.jpg'),
     folder: 'oak_veener'
   },
   { 
     name: 'Plywood Varnished', 
     displayName: 'Plywood Varnished',
     price: 2000,
-    image: '/textures/plywood_varnished/basecolor.jpg',
+    image: getS3Url('textures/plywood_varnished/basecolor.jpg'),
     folder: 'plywood_varnished'
   },
 ];

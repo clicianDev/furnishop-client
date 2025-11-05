@@ -3,34 +3,35 @@ import { Canvas, useLoader } from '@react-three/fiber';
 import { OrbitControls, useGLTF, Stage, PerspectiveCamera } from '@react-three/drei';
 import * as THREE from 'three';
 import { EXRLoader } from 'three/examples/jsm/loaders/EXRLoader';
+import { getS3Url } from '../config/s3Config';
 import './Model3DViewer.css';
 
 const TEXTURES = [
   { 
     name: 'Plywood', 
     folder: 'plywood', 
-    baseColor: '/textures/plywood/basecolor.jpg',
+    baseColor: getS3Url('textures/plywood/basecolor.jpg'),
     woodType: 'Plywood',
     finish: 'Clear Gloss Varnish'
   },
   { 
     name: 'Dark Wood', 
     folder: 'dark_wood', 
-    baseColor: '/textures/dark_wood/basecolor.jpg',
+    baseColor: getS3Url('textures/dark_wood/basecolor.jpg'),
     woodType: 'Dark Wood',
     finish: 'Natural Varnish'
   },
   { 
     name: 'Oak Veneer', 
     folder: 'oak_veener', 
-    baseColor: '/textures/oak_veener/basecolor.jpg',
+    baseColor: getS3Url('textures/oak_veener/basecolor.jpg'),
     woodType: 'Oak Veneer',
     finish: 'Plain'
   },
   { 
     name: 'Plywood Varnish', 
     folder: 'plywood_varnished', 
-    baseColor: '/textures/plywood_varnished/basecolor.jpg',
+    baseColor: getS3Url('textures/plywood_varnished/basecolor.jpg'),
     woodType: 'Plywood',
     finish: 'Natural Varnish'
   },
@@ -38,7 +39,7 @@ const TEXTURES = [
 
 function Model({ modelPath, selectedTexture }) {
   const { scene } = useGLTF(modelPath);
-  const texturePath = `/textures/${selectedTexture.folder}`;
+  const texturePath = getS3Url(`textures/${selectedTexture.folder}`);
   
   // Load base color with TextureLoader
   const colorMap = useLoader(THREE.TextureLoader, `${texturePath}/basecolor.jpg`);

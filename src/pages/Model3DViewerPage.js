@@ -3,34 +3,35 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '../config/axios';
 import Model3DViewer from '../components/Model3DViewer';
 import ARViewer from '../components/ARViewer';
+import { getS3Url } from '../config/s3Config';
 import './Model3DViewerPage.css';
 
 const TEXTURES = [
   { 
     name: 'Plywood', 
     folder: 'plywood', 
-    baseColor: '/textures/plywood/basecolor.jpg',
+    baseColor: getS3Url('textures/plywood/basecolor.jpg'),
     woodType: 'Plywood',
     finish: 'Plain'
   },
   { 
     name: 'Dark Wood', 
     folder: 'dark_wood', 
-    baseColor: '/textures/dark_wood/basecolor.jpg',
+    baseColor: getS3Url('textures/dark_wood/basecolor.jpg'),
     woodType: 'Dark Wood',
     finish: 'Varnished'
   },
   { 
     name: 'Oak Veneer', 
     folder: 'oak_veener', 
-    baseColor: '/textures/oak_veener/basecolor.jpg',
+    baseColor: getS3Url('textures/oak_veener/basecolor.jpg'),
     woodType: 'Oak Veneer',
     finish: 'Plain'
   },
   { 
     name: 'Plywood Varnished', 
     folder: 'plywood_varnished', 
-    baseColor: '/textures/plywood_varnished/basecolor.jpg',
+    baseColor: getS3Url('textures/plywood_varnished/basecolor.jpg'),
     woodType: 'Plywood',
     finish: 'Varnished'
   },
