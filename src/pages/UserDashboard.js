@@ -8,8 +8,16 @@ const UserDashboard = () => {
   const [user, setUser] = useState(null);
   const [orders, setOrders] = useState([]);
   const [customOrders, setCustomOrders] = useState([]);
+  const [repairRequests, setRepairRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('orders'); // 'orders' or 'custom'
+  const [showRepairModal, setShowRepairModal] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [selectedOrderType, setSelectedOrderType] = useState(null);
+  const [repairDescription, setRepairDescription] = useState('');
+  const [repairMedia, setRepairMedia] = useState([]);
+  const [uploadingMedia, setUploadingMedia] = useState(false);
+  const [submittingRepair, setSubmittingRepair] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -20,6 +28,7 @@ const UserDashboard = () => {
     fetchUserData();
     fetchOrders();
     fetchCustomOrders();
+    fetchRepairRequests();
   }, []);
 
   const fetchUserData = async () => {
@@ -51,6 +60,15 @@ const UserDashboard = () => {
     }
   };
 
+  const fetchRepairRequests = async () => {
+    try {
+      const response = await api.get('/api/repair-requests/my-requests');
+      setRepairRequests(response.data);
+    } catch (error) {
+      console.error('Failed to fetch repair requests:', error);
+    }
+  };
+
   const getStatusColor = (status) => {
     switch (status) {
       case 'completed':
@@ -67,6 +85,84 @@ const UserDashboard = () => {
       default:
         return '';
     }
+  };
+
+  const handleOpenRepairModal = (orderId, orderType) => {
+    setSelectedOrder(orderId);
+    setSelectedOrderType(orderType);
+    setShowRepairModal(true);
+    setRepairDescription('');
+    setRepairMedia([]);
+  };
+
+  const handleCloseRepairModal = () => {
+    setShowRepairModal(false);
+    setSelectedOrder(null);
+    setSelectedOrderType(null);
+    setRepairDescription('');
+    setRepairMedia([]);
+  };
+
+  const handleMediaUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    setUploadingMedia(true);
+    try {
+      const formData = new FormData();
+      files.forEach(file => {
+        formData.append('media', file);
+      });
+
+      const response = await api.post('/api/repair-requests/upload-media', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      setRepairMedia([...repairMedia, ...response.data.mediaUrls]);
+    } catch (error) {
+      console.error('Failed to upload media:', error);
+      alert('Failed to upload media. Please try again.');
+    } finally {
+      setUploadingMedia(false);
+    }
+  };
+
+  const handleSubmitRepairRequest = async (e) => {
+    e.preventDefault();
+    
+    if (!repairDescription.trim()) {
+      alert('Please provide a description of the issue');
+      return;
+    }
+
+    setSubmittingRepair(true);
+    try {
+      await api.post('/api/repair-requests', {
+        orderId: selectedOrder,
+        orderType: selectedOrderType,
+        description: repairDescription,
+        media: repairMedia
+      });
+
+      alert('Repair request submitted successfully!');
+      handleCloseRepairModal();
+      fetchRepairRequests(); // Refresh repair requests to update button states
+    } catch (error) {
+      console.error('Failed to submit repair request:', error);
+      alert('Failed to submit repair request. Please try again.');
+    } finally {
+      setSubmittingRepair(false);
+    }
+  };
+
+  const removeMedia = (index) => {
+    setRepairMedia(repairMedia.filter((_, i) => i !== index));
+  };
+
+  const hasRepairRequest = (orderId) => {
+    return repairRequests.some(req => req.orderId === orderId || req.orderId?._id === orderId);
   };
 
   if (loading) return <div className="container">Loading...</div>;
@@ -164,6 +260,19 @@ const UserDashboard = () => {
                             </div>
                           ))}
                         </div>
+                        <div className="order-actions">
+                          <button 
+                            className="btn-repair-request"
+                            onClick={() => handleOpenRepairModal(order._id, 'Transaction')}
+                            disabled={hasRepairRequest(order._id)}
+                            title={hasRepairRequest(order._id) ? "Repair already requested" : "Request repair for this order"}
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                            </svg>
+                            {hasRepairRequest(order._id) ? 'Repair Requested' : 'Request Repair'}
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -254,6 +363,19 @@ const UserDashboard = () => {
                             </div>
                           )}
                         </div>
+                        <div className="order-actions">
+                          <button 
+                            className="btn-repair-request"
+                            onClick={() => handleOpenRepairModal(order._id, 'CustomOrder')}
+                            disabled={hasRepairRequest(order._id)}
+                            title={hasRepairRequest(order._id) ? "Repair already requested" : "Request repair for this custom order"}
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                            </svg>
+                            {hasRepairRequest(order._id) ? 'Repair Requested' : 'Request Repair'}
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -263,6 +385,94 @@ const UserDashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Repair Request Modal */}
+      {showRepairModal && (
+        <div className="modal-overlay" onClick={handleCloseRepairModal}>
+          <div className="modal-content repair-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Request Repair</h2>
+              <button className="modal-close" onClick={handleCloseRepairModal}>×</button>
+            </div>
+            <form onSubmit={handleSubmitRepairRequest}>
+              <div className="form-group">
+                <label htmlFor="repairDescription">Description of Issue *</label>
+                <textarea
+                  id="repairDescription"
+                  value={repairDescription}
+                  onChange={(e) => setRepairDescription(e.target.value)}
+                  placeholder="Please describe the issue you're experiencing with your order..."
+                  rows="5"
+                  required
+                  maxLength="1000"
+                />
+                <small>{repairDescription.length}/1000 characters</small>
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="repairMedia">Upload Images/Videos (Optional)</label>
+                <input
+                  type="file"
+                  id="repairMedia"
+                  accept="image/*,video/*"
+                  multiple
+                  onChange={handleMediaUpload}
+                  disabled={uploadingMedia}
+                />
+                <small>You can upload up to 5 images or videos (max 20MB each)</small>
+              </div>
+
+              {uploadingMedia && (
+                <div className="upload-progress">
+                  <p>Uploading media...</p>
+                </div>
+              )}
+
+              {repairMedia.length > 0 && (
+                <div className="media-preview">
+                  <p><strong>Uploaded Media:</strong></p>
+                  <div className="media-grid">
+                    {repairMedia.map((url, index) => (
+                      <div key={index} className="media-item">
+                        {url.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                          <img src={url} alt={`Upload ${index + 1}`} />
+                        ) : (
+                          <video src={url} controls />
+                        )}
+                        <button 
+                          type="button" 
+                          className="remove-media"
+                          onClick={() => removeMedia(index)}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="modal-actions">
+                <button 
+                  type="button" 
+                  className="btn-secondary" 
+                  onClick={handleCloseRepairModal}
+                  disabled={submittingRepair}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  className="btn-primary"
+                  disabled={submittingRepair || uploadingMedia}
+                >
+                  {submittingRepair ? 'Submitting...' : 'Submit Request'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

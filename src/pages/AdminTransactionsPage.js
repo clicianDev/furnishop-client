@@ -7,8 +7,10 @@ const AdminTransactionsPage = () => {
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState([]);
   const [customOrders, setCustomOrders] = useState([]);
+  const [repairRequests, setRepairRequests] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('transactions'); // 'transactions' or 'custom'
+  const [activeTab, setActiveTab] = useState('transactions'); // 'transactions', 'custom', or 'repairs'
+  const [expandedRepairRequests, setExpandedRepairRequests] = useState({});
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -19,6 +21,7 @@ const AdminTransactionsPage = () => {
     }
     fetchTransactions();
     fetchCustomOrders();
+    fetchRepairRequests();
   }, [navigate]);
 
   const fetchTransactions = async () => {
@@ -41,6 +44,15 @@ const AdminTransactionsPage = () => {
     }
   };
 
+  const fetchRepairRequests = async () => {
+    try {
+      const response = await api.get('/api/repair-requests');
+      setRepairRequests(Array.isArray(response.data) ? response.data : []);
+    } catch (error) {
+      console.error('Failed to fetch repair requests:', error);
+    }
+  };
+
   const handleUpdateTransactionStatus = async (id, status) => {
     try {
       await api.put(`/api/transactions/${id}`, { status });
@@ -59,6 +71,27 @@ const AdminTransactionsPage = () => {
     } catch (error) {
       alert('Failed to update custom order status');
     }
+  };
+
+  const handleUpdateRepairRequestStatus = async (id, status) => {
+    try {
+      await api.put(`/api/repair-requests/${id}`, { status });
+      alert('Repair request status updated!');
+      fetchRepairRequests();
+    } catch (error) {
+      alert('Failed to update repair request status');
+    }
+  };
+
+  const toggleRepairRequestExpanded = (requestId) => {
+    setExpandedRepairRequests(prev => ({
+      ...prev,
+      [requestId]: !prev[requestId]
+    }));
+  };
+
+  const getRepairRequestsForOrder = (orderId) => {
+    return repairRequests.filter(req => req.orderId?._id === orderId);
   };
 
   const getStatusColor = (status) => {
@@ -120,6 +153,16 @@ const AdminTransactionsPage = () => {
           Custom Furniture Orders
           {customOrders.length > 0 && <span className="tab-count">{customOrders.length}</span>}
         </button>
+        <button
+          className={`tab-button ${activeTab === 'repairs' ? 'active' : ''}`}
+          onClick={() => setActiveTab('repairs')}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+          </svg>
+          Repair Requests
+          {repairRequests.length > 0 && <span className="tab-count">{repairRequests.length}</span>}
+        </button>
       </div>
 
       {activeTab === 'transactions' && (
@@ -145,11 +188,22 @@ const AdminTransactionsPage = () => {
                 <p>No orders found</p>
               </div>
             ) : (
-              transactions.map((transaction) => (
+              transactions.map((transaction) => {
+                const orderRepairRequests = getRepairRequestsForOrder(transaction._id);
+                const hasRepairRequests = orderRepairRequests.length > 0;
+                
+                return (
                 <div key={transaction._id} className="transaction-card">
                   <div className="transaction-header">
                     <div>
-                      <h3 className="transaction-id">Order #{transaction._id.substring(0, 8)}</h3>
+                      <div className="order-title-with-badge">
+                        <h3 className="transaction-id">Order #{transaction._id.substring(0, 8)}</h3>
+                        {hasRepairRequests && (
+                          <span className="repair-badge">
+                            {orderRepairRequests.length} REPAIR REQUEST{orderRepairRequests.length > 1 ? 'S' : ''}
+                          </span>
+                        )}
+                      </div>
                       <p className="transaction-date">{new Date(transaction.createdAt).toLocaleDateString()}</p>
                     </div>
                     <select
@@ -236,9 +290,74 @@ const AdminTransactionsPage = () => {
                         </p>
                       </div>
                     )}
+                    
+                    {/* Repair Requests Section */}
+                    {hasRepairRequests && (
+                      <div className="repair-requests-section">
+                        <button 
+                          className="repair-requests-toggle"
+                          onClick={() => toggleRepairRequestExpanded(transaction._id)}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                          </svg>
+                          View Repair Requests ({orderRepairRequests.length})
+                          <svg 
+                            xmlns="http://www.w3.org/2000/svg" 
+                            width="16" 
+                            height="16" 
+                            viewBox="0 0 24 24" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            strokeWidth="2"
+                            style={{ transform: expandedRepairRequests[transaction._id] ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}
+                          >
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                          </svg>
+                        </button>
+                        
+                        {expandedRepairRequests[transaction._id] && (
+                          <div className="repair-requests-list">
+                            {orderRepairRequests.map((request) => (
+                              <div key={request._id} className="repair-request-item">
+                                <div className="repair-request-header">
+                                  <span className="repair-request-id">Request #{request._id.substring(0, 8)}</span>
+                                  <span className={`repair-status ${request.status}`}>{request.status}</span>
+                                </div>
+                                <div className="repair-request-body">
+                                  <p className="repair-description"><strong>Issue:</strong> {request.description}</p>
+                                  {request.media && request.media.length > 0 && (
+                                    <div className="repair-media">
+                                      <p><strong>Attached Media:</strong></p>
+                                      <div className="repair-media-grid">
+                                        {request.media.map((url, idx) => (
+                                          <div key={idx} className="repair-media-item">
+                                            {url.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                                              <img 
+                                                src={url} 
+                                                alt={`Repair media ${idx + 1}`}
+                                                onClick={() => window.open(url, '_blank')}
+                                              />
+                                            ) : (
+                                              <video src={url} controls />
+                                            )}
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                  <p className="repair-date"><strong>Requested:</strong> {new Date(request.createdAt).toLocaleDateString()}</p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
-              ))
+              );
+              })
             )}
           </div>
         </>
@@ -271,13 +390,22 @@ const AdminTransactionsPage = () => {
                 <p>No custom furniture orders found</p>
               </div>
             ) : (
-              customOrders.map((order) => (
+              customOrders.map((order) => {
+                const orderRepairRequests = getRepairRequestsForOrder(order._id);
+                const hasRepairRequests = orderRepairRequests.length > 0;
+                
+                return (
                 <div key={order._id} className="transaction-card custom-order-card">
                   <div className="transaction-header">
                     <div>
                       <div className="order-title-with-badge">
                         <h3 className="transaction-id">Custom Order #{order._id.substring(0, 8)}</h3>
                         <span className="custom-badge">CUSTOM REQUEST</span>
+                        {hasRepairRequests && (
+                          <span className="repair-badge">
+                            {orderRepairRequests.length} REPAIR REQUEST{orderRepairRequests.length > 1 ? 'S' : ''}
+                          </span>
+                        )}
                       </div>
                       <p className="transaction-date">{new Date(order.createdAt).toLocaleDateString()}</p>
                     </div>
@@ -358,6 +486,181 @@ const AdminTransactionsPage = () => {
                         <div className="admin-notes-section">
                           <p className="notes-label">Admin Notes:</p>
                           <p className="notes-text">{order.adminNotes}</p>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Repair Requests Section */}
+                    {hasRepairRequests && (
+                      <div className="repair-requests-section">
+                        <button 
+                          className="repair-requests-toggle"
+                          onClick={() => toggleRepairRequestExpanded(order._id)}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                          </svg>
+                          View Repair Requests ({orderRepairRequests.length})
+                          <svg 
+                            xmlns="http://www.w3.org/2000/svg" 
+                            width="16" 
+                            height="16" 
+                            viewBox="0 0 24 24" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            strokeWidth="2"
+                            style={{ transform: expandedRepairRequests[order._id] ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}
+                          >
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                          </svg>
+                        </button>
+                        
+                        {expandedRepairRequests[order._id] && (
+                          <div className="repair-requests-list">
+                            {orderRepairRequests.map((request) => (
+                              <div key={request._id} className="repair-request-item">
+                                <div className="repair-request-header">
+                                  <span className="repair-request-id">Request #{request._id.substring(0, 8)}</span>
+                                  <span className={`repair-status ${request.status}`}>{request.status}</span>
+                                </div>
+                                <div className="repair-request-body">
+                                  <p className="repair-description"><strong>Issue:</strong> {request.description}</p>
+                                  {request.media && request.media.length > 0 && (
+                                    <div className="repair-media">
+                                      <p><strong>Attached Media:</strong></p>
+                                      <div className="repair-media-grid">
+                                        {request.media.map((url, idx) => (
+                                          <div key={idx} className="repair-media-item">
+                                            {url.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                                              <img 
+                                                src={url} 
+                                                alt={`Repair media ${idx + 1}`}
+                                                onClick={() => window.open(url, '_blank')}
+                                              />
+                                            ) : (
+                                              <video src={url} controls />
+                                            )}
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                  <p className="repair-date"><strong>Requested:</strong> {new Date(request.createdAt).toLocaleDateString()}</p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+              })
+            )}
+          </div>
+        </>
+      )}
+
+      {activeTab === 'repairs' && (
+        <>
+          <div className="stats-row">
+            <div className="stat-box">
+              <p className="stat-box-label">Total Repair Requests</p>
+              <p className="stat-box-value">{repairRequests.length}</p>
+            </div>
+            <div className="stat-box">
+              <p className="stat-box-label">Pending</p>
+              <p className="stat-box-value stat-box-amber">{repairRequests.filter((r) => r.status === 'pending').length}</p>
+            </div>
+            <div className="stat-box">
+              <p className="stat-box-label">In Repair</p>
+              <p className="stat-box-value stat-box-blue">{repairRequests.filter((r) => r.status === 'in-repair').length}</p>
+            </div>
+            <div className="stat-box">
+              <p className="stat-box-label">Completed</p>
+              <p className="stat-box-value stat-box-green">{repairRequests.filter((r) => r.status === 'completed').length}</p>
+            </div>
+          </div>
+
+          <div className="transactions-list">
+            {repairRequests.length === 0 ? (
+              <div className="empty-state">
+                <p>No repair requests found</p>
+              </div>
+            ) : (
+              repairRequests.map((request) => (
+                <div key={request._id} className="transaction-card repair-request-card">
+                  <div className="transaction-header">
+                    <div>
+                      <div className="order-title-with-badge">
+                        <h3 className="transaction-id">Repair Request #{request._id.substring(0, 8)}</h3>
+                        <span className="repair-badge">REPAIR REQUEST</span>
+                      </div>
+                      <p className="transaction-date">{new Date(request.createdAt).toLocaleDateString()}</p>
+                    </div>
+                    <select
+                      value={request.status}
+                      onChange={(e) => handleUpdateRepairRequestStatus(request._id, e.target.value)}
+                      className={`status-select ${getStatusColor(request.status)}`}
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="reviewing">Reviewing</option>
+                      <option value="approved">Approved</option>
+                      <option value="in-repair">In Repair</option>
+                      <option value="completed">Completed</option>
+                      <option value="rejected">Rejected</option>
+                    </select>
+                  </div>
+                  <div className="transaction-body">
+                    <div className="transaction-details-grid">
+                      <div className="detail-item">
+                        <p className="detail-label">Customer</p>
+                        <p className="detail-value">{request.userId?.name || 'Guest'}</p>
+                      </div>
+                      <div className="detail-item">
+                        <p className="detail-label">Email</p>
+                        <p className="detail-value">{request.userId?.email || 'N/A'}</p>
+                      </div>
+                      <div className="detail-item">
+                        <p className="detail-label">Order Type</p>
+                        <p className="detail-value">{request.orderType === 'Transaction' ? 'Regular Order' : 'Custom Order'}</p>
+                      </div>
+                      <div className="detail-item">
+                        <p className="detail-label">Order ID</p>
+                        <p className="detail-value">#{request.orderId?._id?.substring(0, 8) || 'N/A'}</p>
+                      </div>
+                    </div>
+
+                    <div className="repair-request-details">
+                      <h4>Issue Description:</h4>
+                      <p className="repair-description">{request.description}</p>
+
+                      {request.media && request.media.length > 0 && (
+                        <div className="repair-media">
+                          <h4>Attached Media ({request.media.length}):</h4>
+                          <div className="repair-media-grid">
+                            {request.media.map((url, idx) => (
+                              <div key={idx} className="repair-media-item">
+                                {url.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                                  <img 
+                                    src={url} 
+                                    alt={`Repair media ${idx + 1}`}
+                                    onClick={() => window.open(url, '_blank')}
+                                  />
+                                ) : (
+                                  <video src={url} controls />
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {request.adminNotes && (
+                        <div className="admin-notes-section">
+                          <h4>Admin Notes:</h4>
+                          <p className="notes-text">{request.adminNotes}</p>
                         </div>
                       )}
                     </div>
