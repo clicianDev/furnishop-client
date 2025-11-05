@@ -302,7 +302,7 @@ const AdminTransactionsPage = () => {
                             {order.images.map((image, index) => (
                               <img 
                                 key={index} 
-                                src={`${api.defaults.baseURL}/${image}`} 
+                                src={`${image}`} 
                                 alt={`Reference ${index + 1}`}
                                 className="reference-image"
                               />
