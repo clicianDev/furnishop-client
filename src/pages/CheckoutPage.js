@@ -44,18 +44,18 @@ const CheckoutPage = () => {
     }
   };
 
-  const updateQuantity = (productId, newQuantity) => {
+  const updateQuantity = (index, newQuantity) => {
     if (newQuantity < 1) return;
-    const updatedCart = cart.map(item =>
-      item.productId === productId ? { ...item, quantity: newQuantity } : item
+    const updatedCart = cart.map((item, i) =>
+      i === index ? { ...item, quantity: newQuantity } : item
     );
     setCart(updatedCart);
     localStorage.setItem('cart', JSON.stringify(updatedCart));
     window.dispatchEvent(new Event('cartUpdated'));
   };
 
-  const removeItem = (productId) => {
-    const updatedCart = cart.filter(item => item.productId !== productId);
+  const removeItem = (index) => {
+    const updatedCart = cart.filter((item, i) => i !== index);
     setCart(updatedCart);
     localStorage.setItem('cart', JSON.stringify(updatedCart));
     window.dispatchEvent(new Event('cartUpdated'));
@@ -237,20 +237,27 @@ const CheckoutPage = () => {
             <p>Your cart is empty</p>
           ) : (
             <div className="cart-items">
-              {cart.map(item => (
-                <div key={item.productId} className="cart-item card">
+              {cart.map((item, index) => (
+                <div key={index} className="cart-item card">
                   <img src={item.image || 'https://via.placeholder.com/100'} alt={item.name} />
                   <div className="item-details">
                     <h3>{item.name}</h3>
+                    {item.woodType && item.textureName && (
+                      <p className="item-wood-type">
+                        <span className="wood-label">Wood:</span> {item.woodType} {item.finish && `(${item.finish})`} {item.texturePrice > 0 && (
+                          <span className="texture-price-badge"> +₱{item.texturePrice.toLocaleString()}</span>
+                        )}
+                      </p>
+                    )}
                     <p className="item-price">₱{item.price.toFixed(2)}</p>
                   </div>
                   <div className="item-quantity">
-                    <button onClick={() => updateQuantity(item.productId, item.quantity - 1)}>-</button>
+                    <button onClick={() => updateQuantity(index, item.quantity - 1)}>-</button>
                     <span>{item.quantity}</span>
-                    <button onClick={() => updateQuantity(item.productId, item.quantity + 1)}>+</button>
+                    <button onClick={() => updateQuantity(index, item.quantity + 1)}>+</button>
                   </div>
                   <p className="item-total">₱{(item.price * item.quantity).toFixed(2)}</p>
-                  <button onClick={() => removeItem(item.productId)} className="btn-remove">×</button>
+                  <button onClick={() => removeItem(index)} className="btn-remove">×</button>
                 </div>
               ))}
             </div>

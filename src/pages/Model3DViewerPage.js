@@ -12,28 +12,32 @@ const TEXTURES = [
     folder: 'plywood', 
     baseColor: getS3Url('textures/plywood/basecolor.jpg'),
     woodType: 'Plywood',
-    finish: 'Plain'
+    finish: 'Plain',
+    price: 0
   },
   { 
     name: 'Dark Wood', 
     folder: 'dark_wood', 
     baseColor: getS3Url('textures/dark_wood/basecolor.jpg'),
     woodType: 'Dark Wood',
-    finish: 'Varnished'
+    finish: 'Varnished',
+    price: 2000
   },
   { 
     name: 'Oak Veneer', 
     folder: 'oak_veener', 
     baseColor: getS3Url('textures/oak_veener/basecolor.jpg'),
     woodType: 'Oak Veneer',
-    finish: 'Plain'
+    finish: 'Plain',
+    price: 2500
   },
   { 
     name: 'Plywood Varnished', 
     folder: 'plywood_varnished', 
     baseColor: getS3Url('textures/plywood_varnished/basecolor.jpg'),
     woodType: 'Plywood',
-    finish: 'Varnished'
+    finish: 'Varnished',
+    price: 2000
   },
 ];
 
@@ -48,6 +52,24 @@ const Model3DViewerPage = () => {
   const [currentFinish, setCurrentFinish] = useState('Plain');
   const [selectedTexture, setSelectedTexture] = useState(TEXTURES[0]);
   const [currentModelIndex, setCurrentModelIndex] = useState(0);
+
+  // Calculate dynamic price based on selected model variant and texture
+  const calculateTotalPrice = () => {
+    if (!product) return 0;
+    
+    // Get the base price from the selected model variant or default product price
+    let basePrice = product.price;
+    if (product.models && product.models.length > 0 && product.models[currentModelIndex]) {
+      basePrice = product.models[currentModelIndex].price;
+    }
+    
+    // Add texture price
+    const texturePrice = selectedTexture.price || 0;
+    
+    return basePrice + texturePrice;
+  };
+
+  const totalPrice = calculateTotalPrice();
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -66,23 +88,46 @@ const Model3DViewerPage = () => {
 
   const handleAddToCart = () => {
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const existingItem = cart.find(item => item.productId === id);
+    
+    // Get selected model variant info
+    const selectedModel = product.models && product.models.length > 0 
+      ? product.models[currentModelIndex] 
+      : null;
+    const variantName = selectedModel ? selectedModel.variantName : '';
+    
+    // Create a unique cart item identifier including variant and texture
+    const cartItemKey = `${id}_${currentModelIndex}_${selectedTexture.folder}`;
+    
+    // Find existing item with same product, variant, and texture
+    const existingItem = cart.find(item => 
+      item.productId === id && 
+      item.modelIndex === currentModelIndex &&
+      item.textureFolder === selectedTexture.folder
+    );
     
     if (existingItem) {
       existingItem.quantity += quantity;
     } else {
       cart.push({
         productId: id,
-        name: product.name,
-        price: product.price,
+        name: product.name + (variantName ? ` - ${variantName}` : ''),
+        price: totalPrice,
+        basePrice: selectedModel ? selectedModel.price : product.price,
+        texturePrice: selectedTexture.price,
         quantity: quantity,
         image: product.image,
+        modelIndex: currentModelIndex,
+        variantName: variantName,
+        textureName: selectedTexture.name,
+        textureFolder: selectedTexture.folder,
+        woodType: currentWoodType,
+        finish: currentFinish,
       });
     }
     
     localStorage.setItem('cart', JSON.stringify(cart));
     window.dispatchEvent(new Event('cartUpdated'));
-    alert(`${quantity}x ${product.name} added to cart!`);
+    alert(`${quantity}x ${product.name}${variantName ? ' - ' + variantName : ''} (${selectedTexture.name}) added to cart!\nPrice: ₱${totalPrice.toLocaleString()}`);
   };
 
   const handleCheckout = () => {
@@ -210,7 +255,7 @@ const Model3DViewerPage = () => {
           <div className="info-section">
             <div className="info-item">
               <p className="info-label">Price</p>
-              <p className="info-value price">₱{product.price.toLocaleString()}</p>
+              <p className="info-value price">₱{totalPrice.toLocaleString()}</p>
             </div>
             <div className="info-item">
               <p className="info-label">Dimensions</p>
@@ -274,6 +319,9 @@ const Model3DViewerPage = () => {
                       />
                     </div>
                     <span className="mobile-texture-name">{texture.name}</span>
+                    <span className="mobile-texture-price">
+                      {texture.price === 0 ? 'Free' : `+₱${texture.price.toLocaleString()}`}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -336,7 +384,7 @@ const Model3DViewerPage = () => {
         <div className="mobile-info">
           <div className="mobile-info-left">
             <p className="mobile-label">Price</p>
-            <p className="mobile-price">₱{product.price.toLocaleString()}</p>
+            <p className="mobile-price">₱{totalPrice.toLocaleString()}</p>
           </div>
           <div className="mobile-info-right">
             <p className="mobile-label">{currentWoodType} Wood</p>

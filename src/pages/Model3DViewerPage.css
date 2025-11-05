@@ -547,6 +547,20 @@
   font-weight: 700;
 }
 
+.mobile-texture-price {
+  margin-top: 0.15rem;
+  font-size: 0.65rem;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.mobile-texture-option.selected .mobile-texture-price {
+  color: #E17100;
+  font-weight: 700;
+}
+
 /* Loading and Error States */
 .loading-container,
 .error-container {

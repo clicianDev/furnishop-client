@@ -12,28 +12,32 @@ const TEXTURES = [
     folder: 'plywood', 
     baseColor: getS3Url('textures/plywood/basecolor.jpg'),
     woodType: 'Plywood',
-    finish: 'Clear Gloss Varnish'
+    finish: 'Clear Gloss Varnish',
+    price: 0
   },
   { 
     name: 'Dark Wood', 
     folder: 'dark_wood', 
     baseColor: getS3Url('textures/dark_wood/basecolor.jpg'),
     woodType: 'Dark Wood',
-    finish: 'Natural Varnish'
+    finish: 'Natural Varnish',
+    price: 2000
   },
   { 
     name: 'Oak Veneer', 
     folder: 'oak_veener', 
     baseColor: getS3Url('textures/oak_veener/basecolor.jpg'),
     woodType: 'Oak Veneer',
-    finish: 'Plain'
+    finish: 'Plain',
+    price: 2500
   },
   { 
     name: 'Plywood Varnish', 
     folder: 'plywood_varnished', 
     baseColor: getS3Url('textures/plywood_varnished/basecolor.jpg'),
     woodType: 'Plywood',
-    finish: 'Natural Varnish'
+    finish: 'Natural Varnish',
+    price: 2000
   },
 ];
 
@@ -229,6 +233,9 @@ function Model3DViewer({ models, className, onModelChange, onTextureChange, sele
                   />
                 </div>
                 <span className="texture-name">{texture.name}</span>
+                <span className="texture-price">
+                  {texture.price === 0 ? 'Free' : `+₱${texture.price.toLocaleString()}`}
+                </span>
               </div>
             ))}
           </div>
