@@ -568,8 +568,8 @@
   
   .tab-count {
     position: absolute;
-    top: 4px;
-    right: 4px;
+    top: -4px;
+    right: -4px;
     min-width: 18px;
     height: 18px;
     font-size: 0.65rem;
