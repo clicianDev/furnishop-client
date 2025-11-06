@@ -164,6 +164,7 @@ const LoginPage = () => {
             <div className="form-group checkbox-group">
               <label className="checkbox-label">
                 <input
+                  id='remember-me'
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
