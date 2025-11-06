@@ -232,6 +232,7 @@ const Model3DViewerPage = () => {
             product.models && product.models.length > 0 ? (
               <ARViewer 
                 models={product.models}
+                selectedModelIndex={currentModelIndex}
                 selectedTexture={selectedTexture}
               />
             ) : (

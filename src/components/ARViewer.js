@@ -339,7 +339,7 @@ function ARScene({ modelPath, selectedTexture, isSessionActive }) {
   );
 }
 
-function ARViewer({ models, selectedTexture }) {
+function ARViewer({ models, selectedModelIndex = 0, selectedTexture }) {
   const [isARSupported, setIsARSupported] = useState(false);
   const [isCheckingSupport, setIsCheckingSupport] = useState(true);
   const [arSessionActive, setArSessionActive] = useState(false);
@@ -386,7 +386,7 @@ function ARViewer({ models, selectedTexture }) {
   }, []);
 
   const modelsList = typeof models === 'string' ? [{ modelUrl: models, variantName: 'Default' }] : (models || []);
-  const currentModel = modelsList[0];
+  const currentModel = modelsList[selectedModelIndex] || modelsList[0];
 
   const handleEnterAR = async () => {
     if (isStartingAR) {
