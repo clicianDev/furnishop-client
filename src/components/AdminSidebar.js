@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import './AdminSidebar.css';
 
-const AdminSidebar = () => {
+const AdminSidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const userName = localStorage.getItem('userName') || 'Admin User';
 
@@ -44,7 +43,7 @@ const AdminSidebar = () => {
     localStorage.removeItem('userRole');
     localStorage.removeItem('userName');
     navigate('/login');
-    setIsMobileOpen(false);
+    setIsMobileMenuOpen(false);
   };
 
   const SidebarContent = () => (
@@ -79,7 +78,7 @@ const AdminSidebar = () => {
             <Link
               key={item.path}
               to={item.path}
-              onClick={() => setIsMobileOpen(false)}
+              onClick={() => setIsMobileMenuOpen(false)}
               className={`admin-nav-item ${active ? 'active' : ''}`}
             >
               <span className="admin-nav-icon">
@@ -120,38 +119,29 @@ const AdminSidebar = () => {
 
   return (
     <>
-      {/* Mobile Menu Button */}
-      <button
-        onClick={() => setIsMobileOpen(!isMobileOpen)}
-        className="admin-mobile-menu-btn"
-      >
-        {isMobileOpen ? (
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        ) : (
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-          </svg>
-        )}
-      </button>
-
       {/* Desktop Sidebar */}
       <aside className="admin-sidebar admin-sidebar-desktop">
         <SidebarContent />
       </aside>
 
       {/* Mobile Sidebar */}
-      {isMobileOpen && (
+      {isMobileMenuOpen && (
         <>
           <div 
             className="admin-sidebar-backdrop"
-            onClick={() => setIsMobileOpen(false)}
+            onClick={() => setIsMobileMenuOpen(false)}
           />
           <aside className="admin-sidebar admin-sidebar-mobile">
+            {/* Close Button */}
+            <button 
+              className="admin-sidebar-close-btn"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
             <SidebarContent />
           </aside>
         </>

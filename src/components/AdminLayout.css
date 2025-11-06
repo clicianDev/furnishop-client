@@ -18,6 +18,37 @@
   height: 100%;
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+/* Mobile Hamburger Menu Button */
+.admin-header-menu-btn {
+  display: none;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s ease;
+}
+
+.admin-header-menu-btn:hover {
+  background-color: #fafafa;
+}
+
+.admin-header-menu-btn svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: #171717;
+}
+
+@media (max-width: 1023px) {
+  .admin-header-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
 
 .admin-logo-link {

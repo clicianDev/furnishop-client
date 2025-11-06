@@ -12,12 +12,12 @@
 
 /* Desktop Sidebar */
 .admin-sidebar-desktop {
-  display: none;
+  display: flex;
 }
 
-@media (min-width: 1024px) {
+@media (max-width: 1023px) {
   .admin-sidebar-desktop {
-    display: flex;
+    display: none;
   }
 }
 
@@ -27,42 +27,41 @@
   left: 0;
   top: 0;
   bottom: 0;
+  width: 100vw;
   z-index: 50;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
 }
 
-/* Mobile Menu Button */
-.admin-mobile-menu-btn {
-  position: fixed;
-  top: 80px;
-  left: 1rem;
-  z-index: 50;
+/* Mobile Sidebar Close Button */
+.admin-sidebar-close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
   background-color: white;
-  padding: 0.5rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   border: 1px solid #e5e5e5;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  z-index: 51;
 }
 
-.admin-mobile-menu-btn:hover {
-  background-color: #fafafa;
+.admin-sidebar-close-btn:hover {
+  background-color: #fef2f2;
+  border-color: #dc2626;
 }
 
-.admin-mobile-menu-btn svg {
+.admin-sidebar-close-btn svg {
   width: 1.5rem;
   height: 1.5rem;
   color: #171717;
 }
 
-@media (min-width: 1024px) {
-  .admin-mobile-menu-btn {
-    display: none;
-  }
+.admin-sidebar-close-btn:hover svg {
+  color: #dc2626;
 }
 
 /* Backdrop */
@@ -71,12 +70,6 @@
   inset: 0;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 40;
-}
-
-@media (min-width: 1024px) {
-  .admin-sidebar-backdrop {
-    display: none;
-  }
 }
 
 /* Profile Section */
