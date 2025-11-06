@@ -92,6 +92,13 @@ const Model3DViewerPage = () => {
     fetchProduct();
   }, [id]);
 
+  const handleScrollToFooter = () => {
+    const footerContent = document.querySelector('.footer-content');
+    if (footerContent) {
+      footerContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   const handleAddToCart = () => {
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
     
@@ -252,6 +259,17 @@ const Model3DViewerPage = () => {
               Drag to rotate • Scroll to zoom
             </div>
           )}
+
+          {/* Floating Scroll Down Button (Mobile Only) */}
+          <button 
+            className="floating-scroll-down" 
+            onClick={handleScrollToFooter}
+            aria-label="Scroll to options"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
           
           {/* AR Instructions - Only show in AR mode */}
           {/* {viewMode === 'ar' && product.models && product.models.length > 0 && (

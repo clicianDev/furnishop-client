@@ -175,10 +175,62 @@
   align-items: center;
   gap: 0.5rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
+  width: auto;
+  height: auto;
+  max-width: 90%;
+  white-space: nowrap;
 }
 
 .controls-icon {
   font-size: 1rem;
+}
+
+/* Floating Scroll Down Button (Mobile Only) */
+.floating-scroll-down {
+  display: none; /* Hidden on desktop */
+  position: absolute;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 50px;
+  background: rgba(225, 113, 0, 0.9);
+  backdrop-filter: blur(8px);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 15;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  animation: bounce 2s infinite;
+}
+
+.floating-scroll-down:hover {
+  background: rgba(225, 113, 0, 1);
+  transform: translateX(-50%) translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+}
+
+.floating-scroll-down:active {
+  transform: translateX(-50%) translateY(0);
+}
+
+.floating-scroll-down svg {
+  color: white;
+  display: block;
+  margin: auto;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  40% {
+    transform: translateX(-50%) translateY(-10px);
+  }
+  60% {
+    transform: translateX(-50%) translateY(-5px);
+  }
 }
 
 /* Side Info Panel */
@@ -635,6 +687,38 @@
     height: 100%;
   }
   
+  /* Show floating scroll button on mobile */
+  .floating-scroll-down {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Move controls info to top on mobile */
+  .controls-info {
+    bottom: auto;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: auto;
+    max-width: 90%;
+    font-size: 0;
+    line-height: 0;
+  }
+  
+  /* Add mobile-specific content for controls */
+  .controls-info::before {
+    content: '👆 Slide to rotate • 🤏 Pinch to zoom';
+    font-size: 0.65rem;
+    line-height: normal;
+    display: block;
+  }
+  
+  .controls-info .controls-icon,
+  .controls-info::after {
+    display: none;
+  }
+  
   .product-header-info h2 {
     font-size: 1rem;
   }
@@ -723,7 +807,6 @@
   .controls-info {
     font-size: 0.65rem;
     padding: 0.3rem 0.75rem;
-    bottom: 0.5rem;
   }
   
   .mobile-info {
@@ -748,6 +831,28 @@
   .viewer-content {
     height: 80vh;
     min-height: 80vh;
+  }
+  
+  /* Adjust floating button for smaller screens */
+  .floating-scroll-down {
+    width: 45px;
+    height: 45px;
+    bottom: 1rem;
+  }
+  
+  .floating-scroll-down svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  /* Adjust controls info for very small screens */
+  .controls-info {
+    font-size: 0;
+    padding: 0.4rem 0.8rem;
+  }
+  
+  .controls-info::before {
+    font-size: 0.6rem;
   }
   
   .btn-back-header {
