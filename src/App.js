@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import MobileBottomNav from './components/MobileBottomNav';
 import AdminLayout from './components/AdminLayout';
 import HomePage from './pages/HomePage';
 import ShopPage from './pages/ShopPage';
@@ -16,6 +17,7 @@ import AdminProductsPage from './pages/AdminProductsPage';
 import AdminUsersPage from './pages/AdminUsersPage';
 import AdminTransactionsPage from './pages/AdminTransactionsPage';
 import AdminPaymentMethods from './pages/AdminPaymentMethods';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 import './App.css';
 
 function App() {
@@ -38,8 +40,10 @@ function App() {
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/user-dashboard" element={<UserDashboard />} />
                   <Route path="/custom-furniture" element={<CustomFurniturePage />} />
+                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                 </Routes>
                 <Footer />
+                <MobileBottomNav />
               </>
             }
           />

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../config/axios';
+import Toast from '../components/Toast';
 import './AdminTransactionsPage.css';
 
 const AdminTransactionsPage = () => {
@@ -11,6 +12,11 @@ const AdminTransactionsPage = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('transactions'); // 'transactions', 'custom', or 'repairs'
   const [expandedRepairRequests, setExpandedRepairRequests] = useState({});
+  const [toast, setToast] = useState(null);
+
+  const showToast = (message, type) => {
+    setToast({ message, type });
+  };
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -56,30 +62,30 @@ const AdminTransactionsPage = () => {
   const handleUpdateTransactionStatus = async (id, status) => {
     try {
       await api.put(`/api/transactions/${id}`, { status });
-      alert('Transaction status updated!');
+      showToast('Transaction status updated!', 'success');
       fetchTransactions();
     } catch (error) {
-      alert('Failed to update transaction status');
+      showToast('Failed to update transaction status', 'error');
     }
   };
 
   const handleUpdateCustomOrderStatus = async (id, status) => {
     try {
       await api.put(`/api/custom-orders/${id}`, { status });
-      alert('Custom order status updated!');
+      showToast('Custom order status updated!', 'success');
       fetchCustomOrders();
     } catch (error) {
-      alert('Failed to update custom order status');
+      showToast('Failed to update custom order status', 'error');
     }
   };
 
   const handleUpdateRepairRequestStatus = async (id, status) => {
     try {
       await api.put(`/api/repair-requests/${id}`, { status });
-      alert('Repair request status updated!');
+      showToast('Repair request status updated!', 'success');
       fetchRepairRequests();
     } catch (error) {
-      alert('Failed to update repair request status');
+      showToast('Failed to update repair request status', 'error');
     }
   };
 
@@ -119,6 +125,14 @@ const AdminTransactionsPage = () => {
 
   return (
     <div className="admin-transactions-page">
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+      
       <div className="page-header">
         <div>
           <h1 className="page-title">Order Management</h1>

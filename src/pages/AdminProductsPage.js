@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../config/axios';
+import Toast from '../components/Toast';
 import './AdminProductsPage.css';
 
 const AdminProductsPage = () => {
@@ -38,6 +39,11 @@ const AdminProductsPage = () => {
   const [uploadingModel, setUploadingModel] = useState(false);
   const [modelCounter, setModelCounter] = useState(1);
   const [imageCounter, setImageCounter] = useState(1);
+  const [toast, setToast] = useState(null);
+
+  const showToast = (message, type) => {
+    setToast({ message, type });
+  };
 
   const categories = ['all', 'Sofas', 'Beds', 'Chairs', 'Tables', 'Cabinets', 'Wardrobes', 'Doors'];
 
@@ -115,11 +121,11 @@ const AdminProductsPage = () => {
   const confirmDelete = async () => {
     try {
       await api.delete(`/api/products/${deleteConfirm._id}`);
-      alert('Product deleted successfully!');
+      showToast('Product deleted successfully!', 'success');
       setDeleteConfirm(null);
       fetchProducts();
     } catch (error) {
-      alert('Failed to delete product');
+      showToast('Failed to delete product', 'error');
     }
   };
 
@@ -144,14 +150,14 @@ const AdminProductsPage = () => {
       // Validate file type
       const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
       if (!allowedTypes.includes(file.type)) {
-        alert('Only JPG, JPEG, and PNG files are allowed!');
+        showToast('Only JPG, JPEG, and PNG files are allowed!', 'error');
         e.target.value = '';
         return;
       }
 
       // Validate file size (10MB)
       if (file.size > 10 * 1024 * 1024) {
-        alert('File size must be less than 10MB');
+        showToast('File size must be less than 10MB', 'error');
         e.target.value = '';
         return;
       }
@@ -173,14 +179,14 @@ const AdminProductsPage = () => {
       // Validate file type
       const ext = file.name.split('.').pop().toLowerCase();
       if (ext !== 'glb') {
-        alert('Only GLB files are allowed for 3D models!');
+        showToast('Only GLB files are allowed for 3D models!', 'error');
         e.target.value = '';
         return;
       }
 
       // Validate file size (50MB)
       if (file.size > 50 * 1024 * 1024) {
-        alert('File size must be less than 50MB');
+        showToast('File size must be less than 50MB', 'error');
         e.target.value = '';
         return;
       }
@@ -192,7 +198,7 @@ const AdminProductsPage = () => {
   // Upload image to S3
   const uploadImageToS3 = async () => {
     if (!imageFile || !productForm.name) {
-      alert('Please enter product name and select an image file');
+      showToast('Please enter product name and select an image file', 'error');
       return null;
     }
 
@@ -213,7 +219,7 @@ const AdminProductsPage = () => {
       return response.data.imageUrl;
     } catch (error) {
       console.error('Error uploading image:', error);
-      alert('Failed to upload image: ' + (error.response?.data?.message || error.message));
+      showToast('Failed to upload image: ' + (error.response?.data?.message || error.message), 'error');
       return null;
     } finally {
       setUploadingImage(false);
@@ -223,7 +229,7 @@ const AdminProductsPage = () => {
   // Upload model to S3
   const uploadModelToS3 = async () => {
     if (!modelFile || !productForm.name) {
-      alert('Please enter product name and select a model file');
+      showToast('Please enter product name and select a model file', 'error');
       return null;
     }
 
@@ -244,7 +250,7 @@ const AdminProductsPage = () => {
       return response.data.modelUrl;
     } catch (error) {
       console.error('Error uploading model:', error);
-      alert('Failed to upload model: ' + (error.response?.data?.message || error.message));
+      showToast('Failed to upload model: ' + (error.response?.data?.message || error.message), 'error');
       return null;
     } finally {
       setUploadingModel(false);
@@ -253,12 +259,12 @@ const AdminProductsPage = () => {
 
   const handleAddModel = async () => {
     if (!currentModel.price || !currentModel.description || !currentModel.variantName) {
-      alert('Please fill all model fields');
+      showToast('Please fill all model fields', 'error');
       return;
     }
 
     if (!modelFile) {
-      alert('Please select a GLB model file');
+      showToast('Please select a GLB model file', 'error');
       return;
     }
 
@@ -301,7 +307,7 @@ const AdminProductsPage = () => {
     e.preventDefault();
     
     if (!productForm.name || !productForm.price || !productForm.category) {
-      alert('Please fill in all required fields');
+      showToast('Please fill in all required fields', 'error');
       return;
     }
 
@@ -323,10 +329,10 @@ const AdminProductsPage = () => {
 
       if (editingProduct) {
         await api.put(`/api/products/${editingProduct}`, productData);
-        alert('Product updated successfully!');
+        showToast('Product updated successfully!', 'success');
       } else {
         await api.post('/api/products', productData);
-        alert('Product added successfully!');
+        showToast('Product added successfully!', 'success');
       }
       
       setAddingProduct(false);
@@ -341,7 +347,7 @@ const AdminProductsPage = () => {
       fetchProducts();
     } catch (error) {
       console.error('Error saving product:', error);
-      alert('Failed to save product: ' + (error.response?.data?.message || error.message));
+      showToast('Failed to save product: ' + (error.response?.data?.message || error.message), 'error');
     }
   };
 
@@ -361,6 +367,14 @@ const AdminProductsPage = () => {
 
   return (
     <div className="admin-products-page">
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+      
       {/* Header */}
       <div className="page-header">
         <div>

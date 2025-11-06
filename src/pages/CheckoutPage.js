@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../config/axios';
+import Toast from '../components/Toast';
 import './CheckoutPage.css';
 
 const CheckoutPage = () => {
@@ -9,6 +10,7 @@ const CheckoutPage = () => {
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('cod'); // Default to Cash on Delivery
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
+  const [toast, setToast] = useState(null);
   const [shippingInfo, setShippingInfo] = useState({
     address: '',
     city: '',
@@ -23,6 +25,10 @@ const CheckoutPage = () => {
   const [transactionScreenshot, setTransactionScreenshot] = useState(null);
   const [screenshotPreview, setScreenshotPreview] = useState('');
   const [uploadingScreenshot, setUploadingScreenshot] = useState(false);
+
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type });
+  };
 
   useEffect(() => {
     const savedCart = JSON.parse(localStorage.getItem('cart') || '[]');
@@ -96,14 +102,14 @@ const CheckoutPage = () => {
       // Validate file type
       const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
       if (!allowedTypes.includes(file.type)) {
-        alert('Only JPG, JPEG, and PNG files are allowed!');
+        showToast('Only JPG, JPEG, and PNG files are allowed!', 'error');
         e.target.value = '';
         return;
       }
 
       // Validate file size (5MB)
       if (file.size > 5 * 1024 * 1024) {
-        alert('File size must be less than 5MB');
+        showToast('File size must be less than 5MB', 'error');
         e.target.value = '';
         return;
       }
@@ -145,7 +151,7 @@ const CheckoutPage = () => {
       return response.data.imageUrls[0];
     } catch (error) {
       console.error('Error uploading screenshot:', error);
-      alert('Failed to upload screenshot: ' + (error.response?.data?.message || error.message));
+      showToast('Failed to upload screenshot: ' + (error.response?.data?.message || error.message), 'error');
       return null;
     } finally {
       setUploadingScreenshot(false);
@@ -160,12 +166,12 @@ const CheckoutPage = () => {
     }
 
     if (!shippingInfo.address || !shippingInfo.city || !shippingInfo.zipCode || !shippingInfo.country) {
-      alert('Please fill in all shipping information');
+      showToast('Please fill in all shipping information', 'error');
       return;
     }
 
     if (!selectedPaymentMethod) {
-      alert('Please select a payment method');
+      showToast('Please select a payment method', 'error');
       return;
     }
 
@@ -174,12 +180,12 @@ const CheckoutPage = () => {
       // If no screenshot, require all payment fields
       if (!transactionScreenshot) {
         if (!paymentInfo.referenceNumber || !paymentInfo.senderNumber || !paymentInfo.senderName) {
-          alert('Please fill in all payment information or upload a transaction screenshot');
+          showToast('Please fill in all payment information or upload a transaction screenshot', 'error');
           return;
         }
 
         if (!/^\+63\d{10}$/.test(paymentInfo.senderNumber)) {
-          alert('Please enter a valid sender number (+63 followed by 10 digits)');
+          showToast('Please enter a valid sender number (+63 followed by 10 digits)', 'error');
           return;
         }
       }
@@ -217,17 +223,25 @@ const CheckoutPage = () => {
 
       await api.post('/api/transactions', transactionData);
 
-      alert('Order placed successfully!');
+      showToast('Order placed successfully!', 'success');
       localStorage.removeItem('cart');
       setCart([]);
-      navigate('/user-dashboard');
+      setTimeout(() => navigate('/user-dashboard'), 1500);
     } catch (error) {
-      alert('Failed to place order. Please try again.');
+      showToast('Failed to place order. Please try again.', 'error');
     }
   };
 
   return (
     <div className="checkout-page container">
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+      
       <h1>Shopping Cart & Checkout</h1>
 
       <div className="checkout-container">

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../config/axios';
+import Toast from '../components/Toast';
 import './AdminUsersPage.css';
 
 const AdminUsersPage = () => {
@@ -8,6 +9,11 @@ const AdminUsersPage = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [toast, setToast] = useState(null);
+
+  const showToast = (message, type) => {
+    setToast({ message, type });
+  };
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -33,11 +39,11 @@ const AdminUsersPage = () => {
   const handleDeleteUser = async () => {
     try {
       await api.delete(`/api/users/${deleteConfirm._id}`);
-      alert('User deleted successfully!');
+      showToast('User deleted successfully!', 'success');
       setDeleteConfirm(null);
       fetchUsers();
     } catch (error) {
-      alert('Failed to delete user');
+      showToast('Failed to delete user', 'error');
     }
   };
 
@@ -45,6 +51,14 @@ const AdminUsersPage = () => {
 
   return (
     <div className="admin-users-page">
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+      
       <div className="page-header">
         <div>
           <h1 className="page-title">User Management</h1>

@@ -36,6 +36,58 @@
   color: #333;
 }
 
+.profile-avatar {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.avatar-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #E17100 0%, #c86400 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 700;
+  color: white;
+  box-shadow: 0 4px 12px rgba(225, 113, 0, 0.3);
+}
+
+.profile-actions {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.btn-edit-profile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-edit-profile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+}
+
+.btn-edit-profile svg {
+  flex-shrink: 0;
+}
+
 /* Tab Navigation */
 .tab-navigation {
   display: flex;
@@ -442,7 +494,7 @@
   }
   
   .tab-button span:not(.tab-count) {
-    display: none;
+    display: inline; /* Show text on tablet */
   }
   
   .tab-navigation {
@@ -467,15 +519,51 @@
 }
 
 @media (max-width: 640px) {
+  .user-dashboard {
+    padding: 20px 10px;
+  }
+
+  .user-dashboard h1 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+
+  .dashboard-grid {
+    gap: 20px;
+  }
+
+  .user-info {
+    padding: 15px;
+  }
+
+  .avatar-circle {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+  }
+
+  .profile-details p {
+    font-size: 0.9rem;
+  }
+
+  .btn-edit-profile {
+    font-size: 0.9rem;
+    padding: 10px 14px;
+  }
+
   .tab-button {
     flex-direction: column;
     gap: 4px;
     font-size: 0.75rem;
-    padding: 10px 12px;
+    padding: 10px 8px;
+  }
+  
+  .tab-button svg {
+    width: 20px;
+    height: 20px;
   }
   
   .tab-button span:not(.tab-count) {
-    display: inline;
     font-size: 0.7rem;
   }
   
@@ -486,6 +574,96 @@
     min-width: 18px;
     height: 18px;
     font-size: 0.65rem;
+  }
+
+  .order-card,
+  .custom-order-card {
+    padding: 15px;
+  }
+
+  .order-header h3 {
+    font-size: 1rem;
+  }
+
+  .status {
+    font-size: 0.8rem;
+    padding: 4px 12px;
+  }
+
+  .order-details p,
+  .order-shipping p {
+    font-size: 0.85rem;
+  }
+
+  .btn-repair-request {
+    font-size: 0.85rem;
+    padding: 8px 14px;
+  }
+
+  .empty-state {
+    padding: 30px 15px;
+  }
+
+  .empty-state svg {
+    width: 48px;
+    height: 48px;
+  }
+
+  .empty-state h3 {
+    font-size: 1.1rem;
+  }
+
+  .empty-state p {
+    font-size: 0.9rem;
+  }
+
+  .modal-content {
+    margin: 0;
+    border-radius: 0;
+    max-height: 100vh;
+    max-width: 100%;
+  }
+
+  .modal-header h2 {
+    font-size: 1.25rem;
+  }
+
+  .repair-modal form,
+  .edit-profile-form {
+    padding: 20px 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .user-dashboard {
+    padding: 15px 8px;
+  }
+
+  .tab-navigation {
+    padding: 4px;
+  }
+
+  .order-title-with-badge {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .custom-badge {
+    font-size: 0.55rem;
+    padding: 3px 8px;
+  }
+
+  .spec-item {
+    padding: 10px;
+  }
+
+  .spec-label {
+    font-size: 0.7rem;
+  }
+
+  .spec-value {
+    font-size: 0.85rem;
   }
 }
 
@@ -785,3 +963,59 @@
     width: 100%;
   }
 }
+
+/* Edit Profile Modal */
+.edit-profile-modal {
+  max-width: 550px;
+}
+
+.edit-profile-form {
+  padding: 24px;
+}
+
+.edit-profile-form .form-group {
+  margin-bottom: 20px;
+}
+
+.edit-profile-form .form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #333;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.edit-profile-form .form-group input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  transition: border-color 0.2s ease;
+}
+
+.edit-profile-form .form-group input:focus {
+  outline: none;
+  border-color: #4a90e2;
+}
+
+.password-section {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 2px solid #f0f0f0;
+}
+
+.password-section h3 {
+  color: #333;
+  font-size: 1.1rem;
+  margin: 0 0 8px 0;
+}
+
+.password-hint {
+  color: #666;
+  font-size: 0.85rem;
+  margin: 0 0 20px 0;
+  font-style: italic;
+}
+

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../config/axios';
 import Model3DViewer from '../components/Model3DViewer';
+import Toast from '../components/Toast';
 import './ProductPage.css';
 
 const ProductPage = () => {
@@ -14,6 +15,11 @@ const ProductPage = () => {
   const [viewMode, setViewMode] = useState('image'); // 'image' or '3d'
   const [selectedModelIndex, setSelectedModelIndex] = useState(0);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [toast, setToast] = useState(null);
+
+  const showToast = (message, type) => {
+    setToast({ message, type });
+  };
 
   useEffect(() => {
     fetchProduct();
@@ -54,7 +60,7 @@ const ProductPage = () => {
     
     localStorage.setItem('cart', JSON.stringify(cart));
     window.dispatchEvent(new Event('cartUpdated'));
-    alert(`${quantity}x ${product.name} added to cart!`);
+    showToast(`${quantity}x ${product.name} added to cart!`, 'success');
   };
 
   const handleModelChange = (index) => {
@@ -110,6 +116,14 @@ const ProductPage = () => {
 
   return (
     <div className="product-page">
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+      
       {/* Breadcrumb */}
       <div className="breadcrumb-section">
         <div className="container">

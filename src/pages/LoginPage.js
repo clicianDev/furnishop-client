@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../config/axios';
 import Toast from '../components/Toast';
@@ -13,9 +13,24 @@ const LoginPage = () => {
     password: '',
     confirmPassword: ''
   });
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [toast, setToast] = useState(null);
   const isCheckoutRedirect = localStorage.getItem('checkout-redirect') === 'true';
+
+  // Load saved credentials on mount
+  useEffect(() => {
+    const savedEmail = localStorage.getItem('rememberedEmail');
+    const savedPassword = localStorage.getItem('rememberedPassword');
+    if (savedEmail && savedPassword) {
+      setFormData(prev => ({
+        ...prev,
+        email: savedEmail,
+        password: savedPassword
+      }));
+      setRememberMe(true);
+    }
+  }, []);
 
   const showToast = (message, type) => {
     setToast({ message, type });
@@ -45,6 +60,15 @@ const LoginPage = () => {
         : { name: formData.name, email: formData.email, password: formData.password };
 
       const response = await api.post(endpoint, payload);
+      
+      // Handle Remember Me
+      if (isLogin && rememberMe) {
+        localStorage.setItem('rememberedEmail', formData.email);
+        localStorage.setItem('rememberedPassword', formData.password);
+      } else if (isLogin && !rememberMe) {
+        localStorage.removeItem('rememberedEmail');
+        localStorage.removeItem('rememberedPassword');
+      }
       
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('userRole', response.data.user.role);
@@ -135,6 +159,19 @@ const LoginPage = () => {
               placeholder="Enter your password"
             />
           </div>
+          
+          {isLogin && (
+            <div className="form-group checkbox-group">
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                />
+                <span>Remember me</span>
+              </label>
+            </div>
+          )}
           
           {!isLogin && (
             <div className="form-group">

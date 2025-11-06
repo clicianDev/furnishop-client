@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../config/axios';
+import Toast from '../components/Toast';
 import './AdminPaymentMethods.css';
 
 const AdminPaymentMethods = () => {
@@ -22,6 +23,11 @@ const AdminPaymentMethods = () => {
   const [qrFile, setQrFile] = useState(null);
   const [qrPreview, setQrPreview] = useState('');
   const [uploadingQR, setUploadingQR] = useState(false);
+  const [toast, setToast] = useState(null);
+
+  const showToast = (message, type) => {
+    setToast({ message, type });
+  };
 
   const serviceProviders = ['GCash', 'PayMaya'];
   const types = ['eWallet'];
@@ -80,11 +86,11 @@ const AdminPaymentMethods = () => {
   const confirmDelete = async () => {
     try {
       await api.delete(`/api/payment-methods/${deleteConfirm._id}`);
-      alert('Payment method deleted successfully!');
+      showToast('Payment method deleted successfully!', 'success');
       setDeleteConfirm(null);
       fetchPaymentMethods();
     } catch (error) {
-      alert('Failed to delete payment method: ' + (error.response?.data?.message || error.message));
+      showToast('Failed to delete payment method: ' + (error.response?.data?.message || error.message), 'error');
     }
   };
 
@@ -119,14 +125,14 @@ const AdminPaymentMethods = () => {
       const allowedExtensions = ['jpg', 'jpeg', 'png', 'heic', 'heif'];
 
       if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(ext)) {
-        alert('Only JPG, JPEG, PNG, and HEIC/HEIF (iPhone) files are allowed!');
+        showToast('Only JPG, JPEG, PNG, and HEIC/HEIF (iPhone) files are allowed!', 'error');
         e.target.value = '';
         return;
       }
 
       // Validate file size (5MB)
       if (file.size > 5 * 1024 * 1024) {
-        alert('File size must be less than 5MB');
+        showToast('File size must be less than 5MB', 'error');
         e.target.value = '';
         return;
       }
@@ -161,7 +167,7 @@ const AdminPaymentMethods = () => {
       return response.data.qrImageUrl;
     } catch (error) {
       console.error('Error uploading QR code:', error);
-      alert('Failed to upload QR code: ' + (error.response?.data?.message || error.message));
+      showToast('Failed to upload QR code: ' + (error.response?.data?.message || error.message), 'error');
       return null;
     } finally {
       setUploadingQR(false);
@@ -173,13 +179,13 @@ const AdminPaymentMethods = () => {
 
     // Validate account number
     if (!/^\+63\d{10}$/.test(methodForm.accountNumber)) {
-      alert('Please enter a valid Philippine phone number (+63 followed by 10 digits)');
+      showToast('Please enter a valid Philippine phone number (+63 followed by 10 digits)', 'error');
       return;
     }
 
     // Validate QR image
     if (!qrFile && !methodForm.qrImage) {
-      alert('Please upload a QR code image');
+      showToast('Please upload a QR code image', 'error');
       return;
     }
 
@@ -197,10 +203,10 @@ const AdminPaymentMethods = () => {
 
       if (editingMethod) {
         await api.put(`/api/payment-methods/${editingMethod}`, methodData);
-        alert('Payment method updated successfully!');
+        showToast('Payment method updated successfully!', 'success');
       } else {
         await api.post('/api/payment-methods', methodData);
-        alert('Payment method added successfully!');
+        showToast('Payment method added successfully!', 'success');
       }
 
       setAddingMethod(false);
@@ -217,7 +223,7 @@ const AdminPaymentMethods = () => {
       fetchPaymentMethods();
     } catch (error) {
       console.error('Error saving payment method:', error);
-      alert('Failed to save payment method: ' + (error.response?.data?.message || error.message));
+      showToast('Failed to save payment method: ' + (error.response?.data?.message || error.message), 'error');
     }
   };
 
@@ -239,6 +245,14 @@ const AdminPaymentMethods = () => {
 
   return (
     <div className="admin-payment-methods-page">
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+      
       {/* Header */}
       <div className="page-header">
         <div>

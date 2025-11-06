@@ -53,6 +53,81 @@
   color: #0056b3;
 }
 
+.checkbox-group {
+  margin-bottom: 20px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-weight: normal;
+  color: #666;
+  margin-bottom: 0;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #007bff;
+}
+
+.checkbox-label span {
+  font-size: 0.95rem;
+  user-select: none;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .login-page {
+    padding: 15px;
+    min-height: calc(100vh - 64px - 70px); /* Account for navbar and bottom nav */
+  }
+
+  .login-container {
+    padding: 30px 20px;
+    box-shadow: none;
+  }
+
+  .login-container h1 {
+    font-size: 1.75rem;
+  }
+
+  .checkout-notice {
+    font-size: 0.9rem;
+    padding: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-page {
+    padding: 10px;
+  }
+
+  .login-container {
+    padding: 25px 15px;
+  }
+
+  .login-container h1 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+
+  .login-container form {
+    gap: 15px;
+  }
+
+  .btn-large {
+    padding: 12px 20px;
+    font-size: 0.95rem;
+  }
+
+  .toggle-form {
+    font-size: 0.9rem;
+  }
+}
 .checkout-notice {
   background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
   color: #155724;

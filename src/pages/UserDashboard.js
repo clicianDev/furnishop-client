@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../config/axios';
+import Toast from '../components/Toast';
 import './UserDashboard.css';
 
 const UserDashboard = () => {
@@ -18,6 +19,20 @@ const UserDashboard = () => {
   const [repairMedia, setRepairMedia] = useState([]);
   const [uploadingMedia, setUploadingMedia] = useState(false);
   const [submittingRepair, setSubmittingRepair] = useState(false);
+  const [toast, setToast] = useState(null);
+  const [showEditProfileModal, setShowEditProfileModal] = useState(false);
+  const [profileFormData, setProfileFormData] = useState({
+    name: '',
+    email: '',
+    currentPassword: '',
+    newPassword: '',
+    confirmNewPassword: ''
+  });
+  const [updatingProfile, setUpdatingProfile] = useState(false);
+
+  const showToast = (message, type) => {
+    setToast({ message, type });
+  };
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -35,6 +50,13 @@ const UserDashboard = () => {
     try {
       const response = await api.get('/api/users/profile');
       setUser(response.data);
+      setProfileFormData({
+        name: response.data.name,
+        email: response.data.email,
+        currentPassword: '',
+        newPassword: '',
+        confirmNewPassword: ''
+      });
     } catch (error) {
       console.error('Failed to fetch user data:', error);
     }
@@ -123,7 +145,7 @@ const UserDashboard = () => {
       setRepairMedia([...repairMedia, ...response.data.mediaUrls]);
     } catch (error) {
       console.error('Failed to upload media:', error);
-      alert('Failed to upload media. Please try again.');
+      showToast('Failed to upload media. Please try again.', 'error');
     } finally {
       setUploadingMedia(false);
     }
@@ -133,7 +155,7 @@ const UserDashboard = () => {
     e.preventDefault();
     
     if (!repairDescription.trim()) {
-      alert('Please provide a description of the issue');
+      showToast('Please provide a description of the issue', 'error');
       return;
     }
 
@@ -146,12 +168,12 @@ const UserDashboard = () => {
         media: repairMedia
       });
 
-      alert('Repair request submitted successfully!');
+      showToast('Repair request submitted successfully!', 'success');
       handleCloseRepairModal();
       fetchRepairRequests(); // Refresh repair requests to update button states
     } catch (error) {
       console.error('Failed to submit repair request:', error);
-      alert('Failed to submit repair request. Please try again.');
+      showToast('Failed to submit repair request. Please try again.', 'error');
     } finally {
       setSubmittingRepair(false);
     }
@@ -165,10 +187,85 @@ const UserDashboard = () => {
     return repairRequests.some(req => req.orderId === orderId || req.orderId?._id === orderId);
   };
 
+  const handleOpenEditProfile = () => {
+    setShowEditProfileModal(true);
+  };
+
+  const handleCloseEditProfile = () => {
+    setShowEditProfileModal(false);
+    // Reset password fields
+    setProfileFormData(prev => ({
+      ...prev,
+      currentPassword: '',
+      newPassword: '',
+      confirmNewPassword: ''
+    }));
+  };
+
+  const handleProfileInputChange = (e) => {
+    setProfileFormData({
+      ...profileFormData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    
+    // Validate password change if attempting
+    if (profileFormData.newPassword || profileFormData.currentPassword) {
+      if (!profileFormData.currentPassword) {
+        showToast('Please enter your current password', 'error');
+        return;
+      }
+      if (profileFormData.newPassword !== profileFormData.confirmNewPassword) {
+        showToast('New passwords do not match', 'error');
+        return;
+      }
+      if (profileFormData.newPassword.length < 6) {
+        showToast('New password must be at least 6 characters', 'error');
+        return;
+      }
+    }
+
+    setUpdatingProfile(true);
+    try {
+      const updateData = {
+        name: profileFormData.name,
+        email: profileFormData.email
+      };
+
+      // Only include password fields if user is changing password
+      if (profileFormData.currentPassword && profileFormData.newPassword) {
+        updateData.currentPassword = profileFormData.currentPassword;
+        updateData.newPassword = profileFormData.newPassword;
+      }
+
+      await api.put('/api/users/profile', updateData);
+      
+      showToast('Profile updated successfully!', 'success');
+      fetchUserData(); // Refresh user data
+      handleCloseEditProfile();
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      showToast(error.response?.data?.message || 'Failed to update profile', 'error');
+    } finally {
+      setUpdatingProfile(false);
+    }
+  };
+
   if (loading) return <div className="container">Loading...</div>;
 
   return (
     <div className="user-dashboard container">
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+      
       <h1>User Dashboard</h1>
 
       <div className="dashboard-grid">
@@ -176,9 +273,23 @@ const UserDashboard = () => {
           <h2>Profile Information</h2>
           {user && (
             <div className="profile-details">
+              <div className="profile-avatar">
+                <div className="avatar-circle">
+                  {user.name.charAt(0).toUpperCase()}
+                </div>
+              </div>
               <p><strong>Name:</strong> {user.name}</p>
               <p><strong>Email:</strong> {user.email}</p>
               <p><strong>Member Since:</strong> {new Date(user.createdAt).toLocaleDateString()}</p>
+              <div className="profile-actions">
+                <button className="btn-edit-profile" onClick={handleOpenEditProfile}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                  </svg>
+                  Edit Profile
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -478,6 +589,108 @@ const UserDashboard = () => {
                   disabled={submittingRepair || uploadingMedia}
                 >
                   {submittingRepair ? 'Submitting...' : 'Submit Request'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Profile Modal */}
+      {showEditProfileModal && (
+        <div className="modal-overlay" onClick={handleCloseEditProfile}>
+          <div className="modal-content edit-profile-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Edit Profile</h2>
+              <button className="modal-close" onClick={handleCloseEditProfile}>×</button>
+            </div>
+            <form onSubmit={handleUpdateProfile}>
+              <div className="edit-profile-form">
+                <div className="form-group">
+                  <label htmlFor="profileName">Name *</label>
+                  <input
+                    type="text"
+                    id="profileName"
+                    name="name"
+                    value={profileFormData.name}
+                    onChange={handleProfileInputChange}
+                    required
+                    placeholder="Enter your name"
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label htmlFor="profileEmail">Email *</label>
+                  <input
+                    type="email"
+                    id="profileEmail"
+                    name="email"
+                    value={profileFormData.email}
+                    onChange={handleProfileInputChange}
+                    required
+                    placeholder="Enter your email"
+                  />
+                </div>
+
+                <div className="password-section">
+                  <h3>Change Password (Optional)</h3>
+                  <p className="password-hint">Leave blank to keep your current password</p>
+                  
+                  <div className="form-group">
+                    <label htmlFor="currentPassword">Current Password</label>
+                    <input
+                      type="password"
+                      id="currentPassword"
+                      name="currentPassword"
+                      value={profileFormData.currentPassword}
+                      onChange={handleProfileInputChange}
+                      placeholder="Enter current password"
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label htmlFor="newPassword">New Password</label>
+                    <input
+                      type="password"
+                      id="newPassword"
+                      name="newPassword"
+                      value={profileFormData.newPassword}
+                      onChange={handleProfileInputChange}
+                      placeholder="Enter new password"
+                      minLength="6"
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label htmlFor="confirmNewPassword">Confirm New Password</label>
+                    <input
+                      type="password"
+                      id="confirmNewPassword"
+                      name="confirmNewPassword"
+                      value={profileFormData.confirmNewPassword}
+                      onChange={handleProfileInputChange}
+                      placeholder="Confirm new password"
+                      minLength="6"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="modal-actions">
+                <button 
+                  type="button" 
+                  className="btn-secondary" 
+                  onClick={handleCloseEditProfile}
+                  disabled={updatingProfile}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  className="btn-primary"
+                  disabled={updatingProfile}
+                >
+                  {updatingProfile ? 'Updating...' : 'Update Profile'}
                 </button>
               </div>
             </form>

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '../config/axios';
 import Model3DViewer from '../components/Model3DViewer';
 import ARViewer from '../components/ARViewer';
+import Toast from '../components/Toast';
 import { getS3Url } from '../config/s3Config';
 import './Model3DViewerPage.css';
 
@@ -52,6 +53,11 @@ const Model3DViewerPage = () => {
   const [currentFinish, setCurrentFinish] = useState('Plain');
   const [selectedTexture, setSelectedTexture] = useState(TEXTURES[0]);
   const [currentModelIndex, setCurrentModelIndex] = useState(0);
+  const [toast, setToast] = useState(null);
+
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type });
+  };
 
   // Calculate dynamic price based on selected model variant and texture
   const calculateTotalPrice = () => {
@@ -127,7 +133,7 @@ const Model3DViewerPage = () => {
     
     localStorage.setItem('cart', JSON.stringify(cart));
     window.dispatchEvent(new Event('cartUpdated'));
-    alert(`${quantity}x ${product.name}${variantName ? ' - ' + variantName : ''} (${selectedTexture.name}) added to cart!\nPrice: ₱${totalPrice.toLocaleString()}`);
+    showToast(`${quantity}x ${product.name}${variantName ? ' - ' + variantName : ''} (${selectedTexture.name}) added to cart! Price: ₱${totalPrice.toLocaleString()}`, 'success');
   };
 
   const handleCheckout = () => {
@@ -173,6 +179,14 @@ const Model3DViewerPage = () => {
 
   return (
     <div className="model-viewer-page">
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+      
       {/* Header */}
       <div className="viewer-header">
         <div className="header-content">
