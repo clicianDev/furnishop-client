@@ -242,17 +242,19 @@ const ProductPage = () => {
             {/* Quantity & Add to Cart */}
             {(product.stock === undefined || product.stock > 0) && (
               <div className="purchase-actions">
-                <div className="quantity-selector">
+                <div className="quantity-selector" style={{color: 'black'}}>
                   <button 
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
                     className="qty-btn"
+                    style={{color: 'black'}}
                   >
                     -
                   </button>
-                  <span className="qty-value">{quantity}</span>
+                  <span className="qty-value" style={{color: 'black'}}>{quantity}</span>
                   <button 
                     onClick={() => setQuantity(Math.min(product.stock || 999, quantity + 1))}
                     className="qty-btn"
+                    style={{color: 'black', textAlign: 'center'}}
                   >
                     +
                   </button>
