@@ -6,11 +6,11 @@ import Toast from '../components/Toast';
 import './CustomFurniturePage.css';
 
 const FURNITURE_TYPES = [
-  { name: 'Door', price: 8000, icon: '🚪' },
-  { name: 'Table', price: 12000, icon: '🪑' },
-  { name: 'Cabinet', price: 15000, icon: '🗄️' },
-  { name: 'Chair', price: 5000, icon: '💺' },
-  { name: 'Bed', price: 25000, icon: '🛏️' },
+  { name: 'Door', price: 8000 },
+  { name: 'Table', price: 12000 },
+  { name: 'Cabinet', price: 15000 },
+  { name: 'Chair', price: 5000 },
+  { name: 'Bed', price: 25000 },
 ];
 
 const WOOD_TYPES = [
@@ -237,7 +237,6 @@ const CustomFurniturePage = () => {
                     className={`furniture-type-card ${formData.furnitureType === furniture.name ? 'selected' : ''}`}
                     onClick={() => handleInputChange({ target: { name: 'furnitureType', value: furniture.name } })}
                   >
-                    <span className="furniture-icon">{furniture.icon}</span>
                     <span className="furniture-name">{furniture.name}</span>
                     <span className="furniture-price">₱{furniture.price.toLocaleString()}</span>
                   </button>
