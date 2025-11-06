@@ -43,14 +43,78 @@ function Model({ modelPath, selectedTexture, position, rotation, scale }) {
   const { scene } = useGLTF(modelPath);
   const texturePath = getS3Url(`textures/${selectedTexture.folder}`);
   
-  // Load textures
-  const colorMap = useLoader(THREE.TextureLoader, `${texturePath}/basecolor.jpg`);
-  const normalMap = useLoader(EXRLoader, `${texturePath}/normal.exr`);
-  const roughnessMap = useLoader(EXRLoader, `${texturePath}/roughness.exr`);
+  console.log('📂 Texture folder:', selectedTexture.folder);
+  console.log('🔗 Full texture path:', texturePath);
+  
+  // Create texture loaders with crossOrigin configured
+  const [colorMap, setColorMap] = useState(null);
+  const [normalMap, setNormalMap] = useState(null);
+  const [roughnessMap, setRoughnessMap] = useState(null);
 
   const clonedScene = React.useMemo(() => scene.clone(), [scene]);
 
-  React.useEffect(() => {
+  useEffect(() => {
+    // Reset textures when path changes
+    setColorMap(null);
+    setNormalMap(null);
+    setRoughnessMap(null);
+
+    // Load base color with TextureLoader
+    const textureLoader = new THREE.TextureLoader();
+    textureLoader.crossOrigin = 'anonymous';
+    
+    console.log('🔄 Attempting to load texture from:', `${texturePath}/basecolor.jpg`);
+    
+    textureLoader.load(
+      `${texturePath}/basecolor.jpg`,
+      (texture) => {
+        texture.colorSpace = THREE.SRGBColorSpace;
+        setColorMap(texture);
+        console.log('✅ Loaded color map:', `${texturePath}/basecolor.jpg`);
+      },
+      (progress) => {
+        console.log('📥 Loading progress:', Math.round((progress.loaded / progress.total) * 100) + '%');
+      },
+      (error) => {
+        console.error('❌ Failed to load base color texture:', error);
+        console.error('Attempted URL:', `${texturePath}/basecolor.jpg`);
+        console.error('Error type:', error?.constructor?.name);
+        console.error('Error message:', error?.message || 'No error message');
+      }
+    );
+
+    // Load EXR files with EXRLoader
+    const exrLoader = new EXRLoader();
+    exrLoader.crossOrigin = 'anonymous';
+    
+    exrLoader.load(
+      `${texturePath}/normal.exr`,
+      (texture) => {
+        setNormalMap(texture);
+        console.log('✅ Loaded normal map:', `${texturePath}/normal.exr`);
+      },
+      undefined,
+      (error) => {
+        console.warn('⚠️ Failed to load normal map texture:', error);
+      }
+    );
+
+    exrLoader.load(
+      `${texturePath}/roughness.exr`,
+      (texture) => {
+        setRoughnessMap(texture);
+        console.log('✅ Loaded roughness map:', `${texturePath}/roughness.exr`);
+      },
+      undefined,
+      (error) => {
+        console.warn('⚠️ Failed to load roughness map texture:', error);
+      }
+    );
+  }, [texturePath]);
+
+  useEffect(() => {
+    if (!colorMap) return; // Wait for at least the base color texture to load
+
     clonedScene.traverse((child) => {
       if (child.isMesh && child.material) {
         const materialName = child.material.name ? child.material.name.toLowerCase() : '';

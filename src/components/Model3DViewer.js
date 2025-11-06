@@ -58,6 +58,7 @@ function Model({ modelPath, selectedTexture }) {
 
     // Load base color with TextureLoader
     const textureLoader = new THREE.TextureLoader();
+    textureLoader.crossOrigin = 'anonymous';
     
     // Add cache-busting parameter and configure loader
     const cacheBuster = `?t=${Date.now()}`;
@@ -77,6 +78,7 @@ function Model({ modelPath, selectedTexture }) {
 
     // Load EXR files with EXRLoader
     const exrLoader = new EXRLoader();
+    exrLoader.crossOrigin = 'anonymous';
     
     exrLoader.load(
       `${texturePath}/normal.exr${cacheBuster}`,
@@ -181,7 +183,7 @@ function Model3DViewer({ models, className, onModelChange, onTextureChange, sele
         <div className="model-selector" style={{
           position: 'absolute',
           top: '10px',
-          left: '10px',
+          right: '10px',
           zIndex: 10,
           background: 'rgba(0, 0, 0, 0.85)',
           padding: '10px',
