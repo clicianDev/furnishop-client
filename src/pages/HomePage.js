@@ -52,8 +52,8 @@ const HomePage = () => {
       <section className="hero-section">
         <div className="hero-overlay"></div>
         <img
-          src="https://images.unsplash.com/photo-1667584523543-d1d9cc828a15?w=1920&q=80"
-          alt="Modern living room"
+          src="https://images.unsplash.com/photo-1618220179428-22790b461013?w=1920&q=80"
+          alt="Modern living room with white curtains"
           className="hero-background"
         />
         <div className="hero-content">
@@ -67,10 +67,9 @@ const HomePage = () => {
           </p>
           <div className="hero-buttons">
             <Link to="/shop" className="btn btn-primary">
-              Shop Now
-              <span className="arrow">→</span>
+              Shop Now <span className="arrow">→</span>
             </Link>
-            <Link to="/about" className="btn btn-secondary">
+            <Link to="/about" className="btn btn-secondary" style={{ backgroundColor: 'white', color: 'black' }}>
               Learn More
             </Link>
           </div>

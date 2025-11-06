@@ -31,10 +31,13 @@
   position: relative;
   max-width: 1280px;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0 2rem; /* Increased padding */
   height: 100%;
   display: flex;
-  align-items: center;
+  flex-direction: column; /* Align items vertically */
+  justify-content: center; /* Center content vertically */
+  align-items: flex-start; /* Align content to the left */
+  text-align: left; /* Ensure text is left-aligned */
 }
 
 .hero-content > div {
@@ -44,31 +47,33 @@
 .hero-badge {
   display: inline-block;
   padding: 0.5rem 1rem;
-  background-color: #fcd34d;
-  color: #92400e;
+  background-color: #fef9c3; /* Lighter yellow */
+  color: #ca8a04; /* Darker text for contrast */
   border-radius: 9999px;
   font-size: 0.875rem;
+  font-weight: 500;
   margin-bottom: 1.5rem;
+  border: 1px solid #fde68a;
 }
 
 .hero-content h1 {
-  font-size: 4rem;
-  font-weight: 600;
+  font-size: 4.5rem; /* Slightly larger font */
+  font-weight: 700; /* Bolder */
   margin-bottom: 1.5rem;
-  color: #171717;
+  color: #333; /* Darker text for readability */
   line-height: 1.1;
 }
 
 .hero-highlight {
   display: block;
-  color: #E17100;
+  color: #f97316; /* Vibrant orange */
 }
 
 .hero-content p {
-  font-size: 1.25rem;
-  color: #525252;
-  margin-bottom: 2rem;
-  max-width: 32rem;
+  font-size: 1.125rem; /* Adjusted for balance */
+  color: #555; /* Softer dark grey */
+  margin-bottom: 2.5rem; /* More space before buttons */
+  max-width: 36rem; /* Slightly wider */
   line-height: 1.6;
 }
 
@@ -396,7 +401,7 @@
   font-size: 1rem;
   font-weight: 500;
   text-decoration: none;
-  border: none;
+  border: 1px solid transparent; /* Add border for consistency */
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -404,20 +409,23 @@
 .btn-primary {
   background-color: #E17100;
   color: white;
+  border-color: #E17100;
 }
 
 .btn-primary:hover {
   background-color: #c86400;
+  border-color: #c86400;
 }
 
 .btn-secondary {
-  background-color: transparent;
-  color: #171717;
-  border: 1px solid #e5e5e5;
+  background-color: white;
+  color: #333;
+  border: 1px solid #d4d4d4; /* Light grey border */
 }
 
 .btn-secondary:hover {
-  background-color: #fafafa;
+  background-color: #f8f8f8; /* Off-white */
+  border-color: #a3a3a3;
 }
 
 .btn-outline {
@@ -455,13 +463,24 @@
   }
 
   .hero-content h1 {
-    font-size: 3rem;
+    font-size: 3.5rem;
   }
 }
 
 @media (max-width: 768px) {
   .hero-section {
-    height: 450px;
+    height: auto; /* Auto height for mobile */
+    padding: 4rem 0;
+  }
+
+  .hero-overlay {
+    background: linear-gradient(0deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.8) 50%, rgba(255, 255, 255, 0.7) 100%);
+  }
+
+  .hero-content {
+    padding: 0 1.5rem;
+    align-items: center;
+    text-align: center;
   }
 
   .hero-content h1 {
@@ -469,7 +488,8 @@
   }
 
   .hero-content p {
-    font-size: 1.125rem;
+    font-size: 1rem;
+    max-width: 100%;
   }
 
   .section-header h2 {
@@ -486,10 +506,12 @@
   .hero-buttons {
     flex-direction: column;
     width: 100%;
+    align-items: center;
   }
 
   .btn {
     width: 100%;
+    max-width: 320px; /* Max width for buttons on mobile */
     justify-content: center;
   }
 
@@ -500,7 +522,7 @@
 
 @media (max-width: 640px) {
   .hero-content h1 {
-    font-size: 2rem;
+    font-size: 2.25rem;
   }
 
   .category-card {

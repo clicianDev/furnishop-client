@@ -224,6 +224,16 @@
   .product-card img {
     height: 250px;
   }
+
+  .product-card {
+    text-align: center;
+  }
+
+  .product-card .btn {
+    display: inline-block;
+    margin-left: auto;
+    margin-right: auto;
+  }
 }
 
 @media (max-width: 640px) {
