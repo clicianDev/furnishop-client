@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import api from '../config/axios';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -7,7 +8,28 @@ const Navbar = () => {
   const [isAdmin, setIsAdmin] = useState(localStorage.getItem('userRole') === 'admin');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [cartItemCount, setCartItemCount] = useState(0);
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [userName, setUserName] = useState('');
   const location = useLocation();
+
+  // Get user name from localStorage
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const token = localStorage.getItem('token');
+      if (token && isLoggedIn) {
+        try {
+          const response = await api.get('/api/users/profile');
+          if (response.data && response.data.name) {
+            setUserName(response.data.name);
+          }
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+        }
+      }
+    };
+    
+    fetchUserData();
+  }, [isLoggedIn]);
 
   // Calculate cart item count
   useEffect(() => {
@@ -33,8 +55,10 @@ const Navbar = () => {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('userRole');
+    localStorage.removeItem('user');
     setIsLoggedIn(false);
     setIsAdmin(false);
+    setProfileDropdownOpen(false);
     window.location.href = '/';
   };
 
@@ -42,6 +66,15 @@ const Navbar = () => {
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
+  };
+
+  const toggleProfileDropdown = () => {
+    setProfileDropdownOpen(!profileDropdownOpen);
+  };
+
+  const getInitials = (name) => {
+    if (!name) return 'U';
+    return name.charAt(0).toUpperCase();
   };
 
   return (
@@ -92,18 +125,41 @@ const Navbar = () => {
           </li>
           {isLoggedIn ? (
             <>
-              <li>
-                <Link 
-                  to={isAdmin ? "/admin" : "/user-dashboard"} 
-                  className={isActive(isAdmin ? '/admin' : '/user-dashboard') || isActive('/admin-dashboard') ? 'active' : ''}
+              <li className="profile-dropdown-container">
+                <button 
+                  className="profile-avatar-btn" 
+                  onClick={toggleProfileDropdown}
+                  aria-label="Profile menu"
                 >
-                  Dashboard
-                </Link>
-              </li>
-              <li>
-                <button onClick={handleLogout} className="btn-logout">
-                  Logout
+                  <div className="avatar-circle-nav">
+                    {getInitials(userName)}
+                  </div>
                 </button>
+                {profileDropdownOpen && (
+                  <div className="profile-dropdown">
+                    <Link 
+                      to={isAdmin ? "/admin" : "/user-dashboard"} 
+                      className="dropdown-item"
+                      onClick={() => setProfileDropdownOpen(false)}
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                      </svg>
+                      Dashboard
+                    </Link>
+                    <button onClick={handleLogout} className="dropdown-item">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                      </svg>
+                      Logout
+                    </button>
+                  </div>
+                )}
               </li>
             </>
           ) : (
