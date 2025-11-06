@@ -704,3 +704,61 @@
   }
 }
 
+/* Payment Terms and Conditions Checkbox */
+.terms-checkbox-container {
+  margin: 20px 0;
+  padding: 20px;
+  background-color: #f9fafb;
+  border: 2px solid #e5e5e5;
+  border-radius: 8px;
+}
+
+.terms-checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.terms-checkbox {
+  margin-top: 2px;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  flex-shrink: 0;
+  accent-color: #28a745;
+}
+
+.terms-text {
+  font-size: 0.95rem;
+  color: #333;
+  line-height: 1.6;
+}
+
+.btn.btn-success.btn-large:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #6c757d;
+}
+
+@media (max-width: 640px) {
+  .terms-checkbox-container {
+    padding: 15px;
+  }
+
+  .terms-checkbox-label {
+    gap: 10px;
+  }
+
+  .terms-checkbox {
+    width: 18px;
+    height: 18px;
+  }
+
+  .terms-text {
+    font-size: 0.85rem;
+  }
+}
+
+

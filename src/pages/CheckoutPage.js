@@ -25,6 +25,7 @@ const CheckoutPage = () => {
   const [transactionScreenshot, setTransactionScreenshot] = useState(null);
   const [screenshotPreview, setScreenshotPreview] = useState('');
   const [uploadingScreenshot, setUploadingScreenshot] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
@@ -172,6 +173,11 @@ const CheckoutPage = () => {
 
     if (!selectedPaymentMethod) {
       showToast('Please select a payment method', 'error');
+      return;
+    }
+
+    if (!termsAccepted) {
+      showToast('Please accept the payment terms and conditions', 'error');
       return;
     }
 
@@ -545,7 +551,22 @@ const CheckoutPage = () => {
                 </div>
               </div>
 
-              <button onClick={handleCheckout} className="btn btn-success btn-large">
+              {/* Payment Terms and Conditions */}
+              <div className="terms-checkbox-container">
+                <label className="terms-checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={termsAccepted}
+                    onChange={(e) => setTermsAccepted(e.target.checked)}
+                    className="terms-checkbox"
+                  />
+                  <span className="terms-text">
+                    I accept the payment terms and conditions. I confirm that the payment information provided is accurate and I understand that false information may result in order cancellation.
+                  </span>
+                </label>
+              </div>
+
+              <button onClick={handleCheckout} className="btn btn-success btn-large" disabled={!termsAccepted}>
                 Place Order
               </button>
             </div>
