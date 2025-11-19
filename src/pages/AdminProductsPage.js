@@ -10,6 +10,7 @@ const AdminProductsPage = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
+  const [stockFilter, setStockFilter] = useState('all');
   const [editingProduct, setEditingProduct] = useState(null);
   const [addingProduct, setAddingProduct] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
@@ -72,7 +73,11 @@ const AdminProductsPage = () => {
   const filteredProducts = products.filter((product) => {
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = categoryFilter === 'all' || product.category === categoryFilter;
-    return matchesSearch && matchesCategory;
+    const matchesStock = stockFilter === 'all' || 
+      (stockFilter === 'in-stock' && product.stock > 0) ||
+      (stockFilter === 'out-of-stock' && product.stock === 0) ||
+      (stockFilter === 'low-stock' && product.stock > 0 && product.stock <= 5);
+    return matchesSearch && matchesCategory && matchesStock;
   });
 
   const handleEdit = (product) => {
@@ -415,6 +420,18 @@ const AdminProductsPage = () => {
               ))}
             </select>
           </div>
+          <div className="filter-col-1">
+            <select 
+              value={stockFilter} 
+              onChange={(e) => setStockFilter(e.target.value)}
+              className="filter-select"
+            >
+              <option value="all">All Stock Levels</option>
+              <option value="in-stock">In Stock</option>
+              <option value="low-stock">Low Stock (≤5)</option>
+              <option value="out-of-stock">Out of Stock</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -427,6 +444,10 @@ const AdminProductsPage = () => {
         <div className="stat-box">
           <p className="stat-box-label">In Stock</p>
           <p className="stat-box-value stat-box-green">{products.filter((p) => p.stock > 0).length}</p>
+        </div>
+        <div className="stat-box">
+          <p className="stat-box-label">Low Stock</p>
+          <p className="stat-box-value stat-box-yellow">{products.filter((p) => p.stock > 0 && p.stock <= 5).length}</p>
         </div>
         <div className="stat-box">
           <p className="stat-box-label">Out of Stock</p>
@@ -488,8 +509,14 @@ const AdminProductsPage = () => {
               <p className="product-category">{product.category}</p>
               <div className="product-footer">
                 <span className="product-price">₱{product.price.toLocaleString()}</span>
-                <span className={`stock-badge ${product.stock > 0 ? 'stock-badge-success' : 'stock-badge-danger'}`}>
-                  {product.stock > 0 ? `Stock: ${product.stock}` : 'Out of Stock'}
+                <span className={`stock-badge ${
+                  product.stock === 0 ? 'stock-badge-danger' : 
+                  product.stock <= 5 ? 'stock-badge-warning' : 
+                  'stock-badge-success'
+                }`}>
+                  {product.stock === 0 ? 'Out of Stock' : 
+                   product.stock <= 5 ? `Low Stock: ${product.stock}` : 
+                   `Stock: ${product.stock}`}
                 </span>
               </div>
             </div>
@@ -551,7 +578,7 @@ const AdminProductsPage = () => {
                 </div>
               </div>
               <div className="form-group">
-                <label>Stock</label>
+                <label>Stock Quantity *</label>
                 <input
                   type="number"
                   name="stock"
@@ -559,7 +586,13 @@ const AdminProductsPage = () => {
                   onChange={handleProductInputChange}
                   placeholder="0"
                   min="0"
+                  required
                 />
+                {editingProduct && (
+                  <small style={{ color: '#666', display: 'block', marginTop: '4px' }}>
+                    💡 Update this value to add or adjust stock inventory
+                  </small>
+                )}
               </div>
               <div className="form-group">
                 <label>Description</label>
