@@ -1,0 +1,297 @@
+/* Warranty Policy Styles */
+.warranty-policy {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+}
+
+.warranty-policy.inline-content {
+  padding: 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.policy-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #E17100;
+}
+
+.policy-header h2 {
+  font-size: 1.75rem;
+  color: #333;
+  margin: 0;
+  font-weight: 600;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #666;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.close-button:hover {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+.policy-body {
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+  padding-right: 0;
+  margin-right: 0;
+}
+
+.policy-section {
+  margin-bottom: 2rem;
+}
+
+.policy-section h3 {
+  font-size: 1.25rem;
+  color: #E17100;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.policy-section p {
+  color: #555;
+  line-height: 1.7;
+  margin-bottom: 1rem;
+}
+
+.policy-section ul,
+.policy-section ol {
+  padding-left: 1.5rem;
+  padding-right: 0rem;
+  margin-bottom: 1rem;
+}
+
+.policy-section li {
+  color: #555;
+  line-height: 1.8;
+  margin-bottom: 0.75rem;
+}
+
+.policy-section li strong {
+  color: #333;
+  font-weight: 600;
+}
+
+.policy-section ol li {
+  padding-left: 0.5rem;
+}
+
+.contact-section .contact-details {
+  background-color: #f9f9f9;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border-left: 4px solid #E17100;
+}
+
+.contact-details p {
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.contact-details p:last-child {
+  margin-bottom: 0;
+}
+
+.policy-footer {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e5e5e5;
+}
+
+.disclaimer {
+  font-size: 0.875rem;
+  color: #666;
+  line-height: 1.6;
+  font-style: italic;
+  margin-bottom: 0.75rem;
+}
+
+.last-updated {
+  font-size: 0.75rem;
+  color: #999;
+  text-align: right;
+  margin: 0;
+}
+
+/* Modal Styles */
+.warranty-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.warranty-modal {
+  background: white;
+  border-radius: 16px;
+  max-width: max-content;
+  width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.warranty-modal .warranty-policy {
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.warranty-modal .policy-body {
+  max-height: calc(90vh - 180px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Scrollbar Styling */
+.policy-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.policy-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.policy-body::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+
+.policy-body::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .warranty-policy.inline-content {
+    padding: 1.5rem;
+  }
+
+  .warranty-modal .warranty-policy {
+    padding: 1.5rem;
+  }
+
+  .policy-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .policy-section h3 {
+    font-size: 1.1rem;
+  }
+
+  .policy-section {
+    margin-bottom: 1.5rem;
+  }
+
+  .policy-body {
+    max-height: calc(100vh - 180px);
+  }
+
+  .warranty-modal .policy-body {
+    max-height: calc(90vh - 150px);
+  }
+}
+
+@media (max-width: 480px) {
+  .warranty-modal-overlay {
+    padding: 10px;
+  }
+
+  .warranty-policy.inline-content {
+    padding: 1rem;
+    border-radius: 8px;
+  }
+
+  .warranty-modal .warranty-policy {
+    padding: 1rem;
+  }
+
+  .warranty-modal {
+    border-radius: 12px;
+    max-height: 95vh;
+  }
+
+  .policy-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .policy-header h2 {
+    font-size: 1.25rem;
+  }
+
+  .policy-section h3 {
+    font-size: 1rem;
+  }
+
+  .policy-section ul,
+  .policy-section ol {
+    padding-left: 1.25rem;
+  }
+
+  .policy-section li {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .contact-details {
+    padding: 1rem;
+  }
+
+  .contact-details p {
+    font-size: 0.9rem;
+  }
+}

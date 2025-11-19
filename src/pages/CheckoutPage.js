@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../config/axios';
 import Toast from '../components/Toast';
+import WarrantyPolicy from '../components/WarrantyPolicy';
 import './CheckoutPage.css';
 
 const CheckoutPage = () => {
@@ -26,6 +27,8 @@ const CheckoutPage = () => {
   const [screenshotPreview, setScreenshotPreview] = useState('');
   const [uploadingScreenshot, setUploadingScreenshot] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [warrantyAccepted, setWarrantyAccepted] = useState(false);
+  const [showWarrantyModal, setShowWarrantyModal] = useState(false);
 
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
@@ -178,6 +181,11 @@ const CheckoutPage = () => {
 
     if (!termsAccepted) {
       showToast('Please accept the payment terms and conditions', 'error');
+      return;
+    }
+
+    if (!warrantyAccepted) {
+      showToast('Please accept the return & warranty policy', 'error');
       return;
     }
 
@@ -566,7 +574,30 @@ const CheckoutPage = () => {
                 </label>
               </div>
 
-              <button onClick={handleCheckout} className="btn btn-success btn-large" disabled={!termsAccepted}>
+              {/* Return & Warranty Policy */}
+              <div className="terms-checkbox-container warranty-policy-section">
+                <label className="terms-checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={warrantyAccepted}
+                    onChange={(e) => setWarrantyAccepted(e.target.checked)}
+                    className="terms-checkbox"
+                  />
+                  <span className="terms-text">
+                    I have read and accept the{' '}
+                    <button 
+                      type="button"
+                      onClick={() => setShowWarrantyModal(true)}
+                      className="policy-link"
+                    >
+                      Return & Warranty Policy
+                    </button>
+                    . I understand my rights and responsibilities regarding returns and warranty coverage.
+                  </span>
+                </label>
+              </div>
+
+              <button onClick={handleCheckout} className="btn btn-success btn-large" disabled={!termsAccepted || !warrantyAccepted}>
                 Place Order
               </button>
             </div>
@@ -574,6 +605,11 @@ const CheckoutPage = () => {
           </div>
         )}
       </div>
+
+      {/* Warranty Policy Modal */}
+      {showWarrantyModal && (
+        <WarrantyPolicy isModal={true} onClose={() => setShowWarrantyModal(false)} />
+      )}
     </div>
   );
 };

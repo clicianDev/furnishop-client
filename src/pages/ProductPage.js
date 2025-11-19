@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../config/axios';
 import Model3DViewer from '../components/Model3DViewer';
 import Toast from '../components/Toast';
+import WarrantyPolicy from '../components/WarrantyPolicy';
 import './ProductPage.css';
 
 const ProductPage = () => {
@@ -16,6 +17,7 @@ const ProductPage = () => {
   const [selectedModelIndex, setSelectedModelIndex] = useState(0);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [toast, setToast] = useState(null);
+  const [showWarrantyModal, setShowWarrantyModal] = useState(false);
 
   const showToast = (message, type) => {
     setToast({ message, type });
@@ -281,11 +283,11 @@ const ProductPage = () => {
                   <p className="feature-subtitle">Over ₱25,000</p>
                 </div>
               </div>
-              <div className="feature-item">
+              <div className="feature-item" onClick={() => setShowWarrantyModal(true)} style={{ cursor: 'pointer' }}>
                 <span className="feature-icon">🛡️</span>
                 <div>
                   <p className="feature-title">2-Year Warranty</p>
-                  <p className="feature-subtitle">Quality assured</p>
+                  <p className="feature-subtitle">Click to view policy</p>
                 </div>
               </div>
               <div className="feature-item">
@@ -324,6 +326,11 @@ const ProductPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Warranty Policy Modal */}
+      {showWarrantyModal && (
+        <WarrantyPolicy isModal={true} onClose={() => setShowWarrantyModal(false)} />
+      )}
     </div>
   );
 };

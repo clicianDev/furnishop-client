@@ -736,6 +736,27 @@
   line-height: 1.6;
 }
 
+.policy-link {
+  background: none;
+  border: none;
+  color: #E17100;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0;
+  transition: color 0.2s ease;
+}
+
+.policy-link:hover {
+  color: #c05d00;
+}
+
+.warranty-policy-section {
+  border-color: #E17100;
+  background-color: #fff8f0;
+}
+
 .btn.btn-success.btn-large:disabled {
   opacity: 0.5;
   cursor: not-allowed;
