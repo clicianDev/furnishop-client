@@ -105,9 +105,9 @@ const PrivacyPolicy = () => {
             If you have any questions about this privacy policy or our privacy practices, please contact us at:
           </p>
           <div className="contact-info">
-            <p><strong>Email:</strong> privacy@furnishop.com</p>
-            <p><strong>Phone:</strong> +1 (555) 123-4567</p>
-            <p><strong>Address:</strong> 123 Furniture Street, Design City, DC 12345</p>
+            <p><strong>Email:</strong> fpbernasfurnitureshop@gmail.com</p>
+            <p><strong>Phone:</strong> +63 951 8644 486</p>
+            <p><strong>Address:</strong> Barangay Sampaloc 2, Sariaya, Quezon, Philippines</p>
           </div>
         </section>
       </div>

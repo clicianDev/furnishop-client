@@ -62,7 +62,7 @@ const WarrantyPolicy = ({ isModal = false, onClose = null }) => {
         <section className="policy-section">
           <h3>📝 How to Make a Claim</h3>
           <ol>
-            <li><strong>Contact Us:</strong> Email support@furnishop.com or call customer service</li>
+            <li><strong>Contact Us:</strong> Email fpbernasfurnitureshop@gmail.com or call customer service</li>
             <li><strong>Provide Details:</strong> Include order number, photos of issue, and description</li>
             <li><strong>Assessment:</strong> Our team will review and respond within 2-3 business days</li>
             <li><strong>Resolution:</strong> Approved claims will receive repair, replacement, or refund</li>
@@ -96,8 +96,8 @@ const WarrantyPolicy = ({ isModal = false, onClose = null }) => {
           <h3>📞 Need Help?</h3>
           <p>Our customer service team is here to assist you:</p>
           <div className="contact-details">
-            <p><strong>Email:</strong> support@furnishop.com</p>
-            <p><strong>Phone:</strong> +63 123 456 7890</p>
+            <p><strong>Email:</strong> fpbernasfurnitureshop@gmail.com</p>
+            <p><strong>Phone:</strong> +63 951 8644 486</p>
             <p><strong>Hours:</strong> Monday-Friday, 9:00 AM - 6:00 PM (PHT)</p>
           </div>
         </section>
