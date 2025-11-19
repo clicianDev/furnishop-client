@@ -35,6 +35,10 @@ const AdminDashboard = () => {
   const [recentCustomOrders, setRecentCustomOrders] = useState([]);
   const [recentRepairRequests, setRecentRepairRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [monthRange, setMonthRange] = useState(6);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [transactions, setTransactions] = useState([]);
+  const [customOrders, setCustomOrders] = useState([]);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -59,31 +63,35 @@ const AdminDashboard = () => {
 
       const products = Array.isArray(productsRes.data) ? productsRes.data : [];
       const users = Array.isArray(usersRes.data) ? usersRes.data : [];
-      const transactions = Array.isArray(transactionsRes.data) ? transactionsRes.data : [];
-      const customOrders = Array.isArray(customOrdersRes.data) ? customOrdersRes.data : [];
+      const transactionsData = Array.isArray(transactionsRes.data) ? transactionsRes.data : [];
+      const customOrdersData = Array.isArray(customOrdersRes.data) ? customOrdersRes.data : [];
       const repairRequests = Array.isArray(repairRequestsRes.data) ? repairRequestsRes.data : [];
 
+      // Store transactions and custom orders in state
+      setTransactions(transactionsData);
+      setCustomOrders(customOrdersData);
+
       // Calculate stats
-      const totalSales = transactions.reduce((sum, t) => sum + (t.totalAmount || 0), 0);
-      const customOrdersSales = customOrders.reduce((sum, o) => sum + (o.totalPrice || 0), 0);
+      const totalSales = transactionsData.reduce((sum, t) => sum + (t.totalAmount || 0), 0);
+      const customOrdersSales = customOrdersData.reduce((sum, o) => sum + (o.totalPrice || 0), 0);
       
       setStats({
         totalSales: totalSales + customOrdersSales,
-        totalOrders: transactions.length,
+        totalOrders: transactionsData.length,
         totalProducts: products.length,
         totalUsers: users.length,
-        customOrders: customOrders.length,
+        customOrders: customOrdersData.length,
         repairRequests: repairRequests.length
       });
 
       // Calculate monthly statistics
-      calculateMonthlyStats(transactions, customOrders, repairRequests);
+      calculateMonthlyStats(transactionsData, customOrdersData, repairRequests);
       
       // Generate sales data for charts
-      generateSalesData(transactions, customOrders);
+      generateSalesData(transactionsData, customOrdersData, monthRange, selectedYear);
       
       // Calculate revenue breakdown
-      calculateRevenueBreakdown(transactions, customOrders);
+      calculateRevenueBreakdown(transactionsData, customOrdersData);
 
       // Get recent orders (last 4)
       const recent = transactions
@@ -200,15 +208,30 @@ const AdminDashboard = () => {
     });
   };
 
-  const generateSalesData = (transactions, customOrders) => {
-    // Get last 6 months of data
+  const generateSalesData = (transactions, customOrders, range = 6, year = new Date().getFullYear()) => {
     const monthsData = [];
-    const now = new Date();
+    const currentDate = new Date();
+    const isCurrentYear = year === currentDate.getFullYear();
     
-    for (let i = 5; i >= 0; i--) {
-      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const month = date.getMonth();
-      const year = date.getFullYear();
+    // Determine the starting month
+    let startMonth = 0;
+    let endMonth = 11;
+    
+    if (isCurrentYear) {
+      // For current year, show from (current month - range + 1) to current month
+      endMonth = currentDate.getMonth();
+      startMonth = Math.max(0, endMonth - range + 1);
+    } else {
+      // For past years, show all 12 months or specified range
+      endMonth = 11;
+      startMonth = Math.max(0, 12 - range);
+    }
+    
+    const monthsToShow = endMonth - startMonth + 1;
+    
+    for (let i = 0; i < monthsToShow; i++) {
+      const month = startMonth + i;
+      const date = new Date(year, month, 1);
       const monthName = date.toLocaleString('default', { month: 'short' });
 
       const monthTransactions = transactions.filter(t => {
@@ -235,6 +258,28 @@ const AdminDashboard = () => {
     }
 
     setSalesData(monthsData);
+  };
+
+  // Handle month range change
+  const handleMonthRangeChange = (range) => {
+    setMonthRange(range);
+    generateSalesData(transactions, customOrders, range, selectedYear);
+  };
+
+  // Handle year change
+  const handleYearChange = (year) => {
+    setSelectedYear(year);
+    generateSalesData(transactions, customOrders, monthRange, year);
+  };
+
+  // Generate available years (last 5 years)
+  const getAvailableYears = () => {
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    for (let i = 0; i < 5; i++) {
+      years.push(currentYear - i);
+    }
+    return years;
   };
 
   const calculateRevenueBreakdown = (transactions, customOrders) => {
@@ -519,7 +564,38 @@ const AdminDashboard = () => {
       {/* Sales Analysis Charts */}
       <div className="charts-section">
         <div className="chart-card sales-chart">
-          <h2 className="card-title">Sales Analysis (Last 6 Months)</h2>
+          <div className="chart-header">
+            <h2 className="card-title">Sales Analysis</h2>
+            <div className="chart-filters">
+              <div className="filter-group">
+                <label htmlFor="month-range">Show:</label>
+                <select 
+                  id="month-range"
+                  className="filter-select"
+                  value={monthRange} 
+                  onChange={(e) => handleMonthRangeChange(Number(e.target.value))}
+                >
+                  <option value={3}>Last 3 Months</option>
+                  <option value={6}>Last 6 Months</option>
+                  <option value={9}>Last 9 Months</option>
+                  <option value={12}>Last 12 Months</option>
+                </select>
+              </div>
+              <div className="filter-group">
+                <label htmlFor="year-select">Year:</label>
+                <select 
+                  id="year-select"
+                  className="filter-select"
+                  value={selectedYear} 
+                  onChange={(e) => handleYearChange(Number(e.target.value))}
+                >
+                  {getAvailableYears().map(year => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={salesData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
