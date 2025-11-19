@@ -19,6 +19,8 @@ const UserDashboard = () => {
   const [repairMedia, setRepairMedia] = useState([]);
   const [uploadingMedia, setUploadingMedia] = useState(false);
   const [submittingRepair, setSubmittingRepair] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
   const [toast, setToast] = useState(null);
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
   const [profileFormData, setProfileFormData] = useState({
@@ -123,6 +125,7 @@ const UserDashboard = () => {
     setSelectedOrderType(null);
     setRepairDescription('');
     setRepairMedia([]);
+    setTermsAccepted(false);
   };
 
   const handleMediaUpload = async (e) => {
@@ -159,13 +162,19 @@ const UserDashboard = () => {
       return;
     }
 
+    if (!termsAccepted) {
+      showToast('Please accept the Terms and Conditions to proceed', 'error');
+      return;
+    }
+
     setSubmittingRepair(true);
     try {
       await api.post('/api/repair-requests', {
         orderId: selectedOrder,
         orderType: selectedOrderType,
         description: repairDescription,
-        media: repairMedia
+        media: repairMedia,
+        termsAccepted: true
       });
 
       showToast('Repair request submitted successfully!', 'success');
@@ -574,6 +583,28 @@ const UserDashboard = () => {
                 </div>
               )}
 
+              {/* Terms and Conditions */}
+              <div className="form-group terms-agreement">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={termsAccepted}
+                    onChange={(e) => setTermsAccepted(e.target.checked)}
+                  />
+                  <span>
+                    I have read and agree to the{' '}
+                    <button
+                      type="button"
+                      className="terms-link"
+                      onClick={() => setShowTermsModal(true)}
+                    >
+                      Terms and Conditions
+                    </button>
+                    {' '}for repair services *
+                  </span>
+                </label>
+              </div>
+
               <div className="modal-actions">
                 <button 
                   type="button" 
@@ -592,6 +623,113 @@ const UserDashboard = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Terms and Conditions Modal */}
+      {showTermsModal && (
+        <div className="modal-overlay" onClick={() => setShowTermsModal(false)}>
+          <div className="modal-content terms-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Repair Service Terms and Conditions</h2>
+              <button className="modal-close" onClick={() => setShowTermsModal(false)}>×</button>
+            </div>
+            <div className="terms-content">
+              <section>
+                <h3>1. Eligibility</h3>
+                <ul>
+                  <li>Repair services are only available for furniture purchased directly from FurniShop.</li>
+                  <li>Valid proof of purchase (order number) is required for all repair requests.</li>
+                  <li>Furniture must be within the warranty period or eligible for post-warranty repair services.</li>
+                </ul>
+              </section>
+
+              <section>
+                <h3>2. Request Review Process</h3>
+                <ul>
+                  <li>All repair requests will be reviewed by our admin team within 24-48 hours.</li>
+                  <li>We reserve the right to approve or deny any repair request based on eligibility criteria.</li>
+                  <li>Additional information or images may be requested for assessment.</li>
+                </ul>
+              </section>
+
+              <section>
+                <h3>3. Repair Services</h3>
+                <ul>
+                  <li>Minor damage repairs may be provided at no cost for eligible furniture within warranty.</li>
+                  <li>Major repairs or post-warranty repairs may incur charges, which will be communicated before proceeding.</li>
+                  <li>Repair timelines will be provided upon approval of the request.</li>
+                  <li>FurniShop is not responsible for damages caused by misuse, neglect, or accidents.</li>
+                </ul>
+              </section>
+
+              <section>
+                <h3>4. Customer Responsibilities</h3>
+                <ul>
+                  <li>Provide accurate and complete information about the damage.</li>
+                  <li>Submit clear photos showing the damaged area from multiple angles.</li>
+                  <li>Make the furniture accessible for inspection or pickup if required.</li>
+                  <li>Follow any care instructions provided after repair completion.</li>
+                </ul>
+              </section>
+
+              <section>
+                <h3>5. Exclusions</h3>
+                <ul>
+                  <li>Normal wear and tear is not covered under free repair services.</li>
+                  <li>Damage from improper assembly, modification, or unauthorized repairs.</li>
+                  <li>Damage from natural disasters, fire, water, or environmental conditions.</li>
+                  <li>Cosmetic issues that do not affect functionality.</li>
+                </ul>
+              </section>
+
+              <section>
+                <h3>6. Privacy and Data</h3>
+                <ul>
+                  <li>Information provided will be used solely for processing your repair request.</li>
+                  <li>Images and descriptions may be retained for quality control and record-keeping.</li>
+                  <li>Your data will be handled in accordance with our Privacy Policy.</li>
+                </ul>
+              </section>
+
+              <section>
+                <h3>7. Limitation of Liability</h3>
+                <p>
+                  FurniShop shall not be liable for any indirect, incidental, or consequential damages 
+                  arising from repair services. Our liability is limited to the repair or replacement 
+                  of the damaged furniture component.
+                </p>
+              </section>
+
+              <section>
+                <h3>8. Agreement</h3>
+                <p>
+                  By submitting a repair request, you acknowledge that you have read, understood, and 
+                  agree to be bound by these Terms and Conditions. You confirm that all information 
+                  provided is accurate and complete to the best of your knowledge.
+                </p>
+              </section>
+            </div>
+            <div className="modal-actions">
+              <button 
+                type="button" 
+                className="btn-primary"
+                onClick={() => {
+                  setTermsAccepted(true);
+                  setShowTermsModal(false);
+                }}
+              >
+                Accept Terms
+              </button>
+              <button 
+                type="button" 
+                className="btn-secondary"
+                onClick={() => setShowTermsModal(false)}
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
