@@ -59,9 +59,7 @@ const Footer = () => {
           <div className="footer-section">
             <h3 className="footer-heading">Customer Service</h3>
             <ul className="footer-links">
-              <li><Link to="/shipping">Shipping Information</Link></li>
               <li><Link to="/returns">Returns & Exchanges</Link></li>
-              <li><Link to="/faq">FAQ</Link></li>
               <li><Link to="/privacy-policy">Privacy Policy</Link></li>
             </ul>
           </div>
@@ -100,7 +98,6 @@ const Footer = () => {
         <div className="footer-bottom">
           <p className="copyright">© 2025 FurniShop. All rights reserved.</p>
           <div className="footer-bottom-links">
-            <Link to="/terms">Terms of Service</Link>
             <Link to="/privacy-policy">Privacy Policy</Link>
           </div>
         </div>

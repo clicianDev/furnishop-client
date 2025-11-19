@@ -18,6 +18,9 @@ import AdminUsersPage from './pages/AdminUsersPage';
 import AdminTransactionsPage from './pages/AdminTransactionsPage';
 import AdminPaymentMethods from './pages/AdminPaymentMethods';
 import PrivacyPolicy from './pages/PrivacyPolicy';
+import ReturnsPage from './pages/ReturnsPage';
+import AboutPage from './pages/AboutPage';
+import ContactPage from './pages/ContactPage';
 import './App.css';
 
 function App() {
@@ -41,6 +44,9 @@ function App() {
                   <Route path="/user-dashboard" element={<UserDashboard />} />
                   <Route path="/custom-furniture" element={<CustomFurniturePage />} />
                   <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                  <Route path="/returns" element={<ReturnsPage />} />
+                  <Route path="/about" element={<AboutPage />} />
+                  <Route path="/contact" element={<ContactPage />} />
                 </Routes>
                 <Footer />
                 <MobileBottomNav />

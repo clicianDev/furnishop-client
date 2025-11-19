@@ -75,14 +75,6 @@ const PrivacyPolicy = () => {
         </section>
 
         <section className="policy-section">
-          <h2>7. Cookies</h2>
-          <p>
-            Our website uses cookies to distinguish you from other users of our website. This helps us to 
-            provide you with a good experience when you browse our website and also allows us to improve our site.
-          </p>
-        </section>
-
-        <section className="policy-section">
           <h2>8. Third-Party Links</h2>
           <p>
             Our website may include links to third-party websites, plug-ins and applications. Clicking on those 
